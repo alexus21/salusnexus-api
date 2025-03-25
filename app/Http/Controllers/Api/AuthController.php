@@ -103,7 +103,8 @@ class AuthController extends Controller {
             'phone' => $phone,
             'email' => $request->email,
             'address' => $request->address,
-            'password' => Hash::make($request->password), // Encriptar la contraseña con Hash
+            'password' => Hash::make($request->password), // Encriptar la contraseña con Hash,
+            'email_verified_at' => Carbon::now() // Marcar el correo como verificado
         ]);
 
         // Generar un token de acceso personal para el usuario
