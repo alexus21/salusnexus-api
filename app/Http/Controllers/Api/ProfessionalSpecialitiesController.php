@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Professional_Specialities;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProfessional_SpecialitiesRequest;
 use App\Http\Requests\UpdateProfessional_SpecialitiesRequest;
+use App\Models\Professional_Specialities;
 
 class ProfessionalSpecialitiesController extends Controller
 {

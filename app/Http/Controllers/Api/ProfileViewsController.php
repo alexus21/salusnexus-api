@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Subscriptions;
-use App\Http\Requests\StoreSubscriptionsRequest;
-use App\Http\Requests\UpdateSubscriptionsRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProfileViewsRequest;
+use App\Http\Requests\UpdateProfileViewsRequest;
+use App\Models\ProfileViews;
 
-class SubscriptionsController extends Controller
+class ProfileViewsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class SubscriptionsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSubscriptionsRequest $request)
+    public function store(StoreProfileViewsRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class SubscriptionsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Subscriptions $subscriptions)
+    public function show(ProfileViews $profileViews)
     {
         //
     }
@@ -43,7 +44,7 @@ class SubscriptionsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Subscriptions $subscriptions)
+    public function edit(ProfileViews $profileViews)
     {
         //
     }
@@ -51,7 +52,7 @@ class SubscriptionsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSubscriptionsRequest $request, Subscriptions $subscriptions)
+    public function update(UpdateProfileViewsRequest $request, ProfileViews $profileViews)
     {
         //
     }
@@ -59,7 +60,7 @@ class SubscriptionsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Subscriptions $subscriptions)
+    public function destroy(ProfileViews $profileViews)
     {
         //
     }

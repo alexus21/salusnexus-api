@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\MedicationsCategories;
-use App\Http\Requests\StoreMedicationsCategoriesRequest;
-use App\Http\Requests\UpdateMedicationsCategoriesRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMedicationsRequest;
+use App\Http\Requests\UpdateMedicationsRequest;
+use App\Models\Medications;
 
-class MedicationsCategoriesController extends Controller
+class MedicationsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class MedicationsCategoriesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreMedicationsCategoriesRequest $request)
+    public function store(StoreMedicationsRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class MedicationsCategoriesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MedicationsCategories $medicationsCategories)
+    public function show(Medications $medications)
     {
         //
     }
@@ -43,7 +44,7 @@ class MedicationsCategoriesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MedicationsCategories $medicationsCategories)
+    public function edit(Medications $medications)
     {
         //
     }
@@ -51,7 +52,7 @@ class MedicationsCategoriesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMedicationsCategoriesRequest $request, MedicationsCategories $medicationsCategories)
+    public function update(UpdateMedicationsRequest $request, Medications $medications)
     {
         //
     }
@@ -59,7 +60,7 @@ class MedicationsCategoriesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MedicationsCategories $medicationsCategories)
+    public function destroy(Medications $medications)
     {
         //
     }

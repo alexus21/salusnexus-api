@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Medications;
-use App\Http\Requests\StoreMedicationsRequest;
-use App\Http\Requests\UpdateMedicationsRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProfessionalProfilesRequest;
+use App\Http\Requests\UpdateProfessionalProfilesRequest;
+use App\Models\ProfessionalProfiles;
 
-class MedicationsController extends Controller
+class ProfessionalProfilesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class MedicationsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreMedicationsRequest $request)
+    public function store(StoreProfessionalProfilesRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class MedicationsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Medications $medications)
+    public function show(ProfessionalProfiles $professionalProfiles)
     {
         //
     }
@@ -43,7 +44,7 @@ class MedicationsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Medications $medications)
+    public function edit(ProfessionalProfiles $professionalProfiles)
     {
         //
     }
@@ -51,7 +52,7 @@ class MedicationsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMedicationsRequest $request, Medications $medications)
+    public function update(UpdateProfessionalProfilesRequest $request, ProfessionalProfiles $professionalProfiles)
     {
         //
     }
@@ -59,7 +60,7 @@ class MedicationsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Medications $medications)
+    public function destroy(ProfessionalProfiles $professionalProfiles)
     {
         //
     }

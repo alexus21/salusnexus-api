@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\WorkHours;
-use App\Http\Requests\StoreWorkHoursRequest;
-use App\Http\Requests\UpdateWorkHoursRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMedicationsCategoriesRequest;
+use App\Http\Requests\UpdateMedicationsCategoriesRequest;
+use App\Models\MedicationsCategories;
 
-class WorkHoursController extends Controller
+class MedicationsCategoriesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class WorkHoursController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreWorkHoursRequest $request)
+    public function store(StoreMedicationsCategoriesRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class WorkHoursController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(WorkHours $workHours)
+    public function show(MedicationsCategories $medicationsCategories)
     {
         //
     }
@@ -43,7 +44,7 @@ class WorkHoursController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WorkHours $workHours)
+    public function edit(MedicationsCategories $medicationsCategories)
     {
         //
     }
@@ -51,7 +52,7 @@ class WorkHoursController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateWorkHoursRequest $request, WorkHours $workHours)
+    public function update(UpdateMedicationsCategoriesRequest $request, MedicationsCategories $medicationsCategories)
     {
         //
     }
@@ -59,7 +60,7 @@ class WorkHoursController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WorkHours $workHours)
+    public function destroy(MedicationsCategories $medicationsCategories)
     {
         //
     }

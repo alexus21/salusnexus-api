@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\ProfessionalProfiles;
-use App\Http\Requests\StoreProfessionalProfilesRequest;
-use App\Http\Requests\UpdateProfessionalProfilesRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreReviewsRequest;
+use App\Http\Requests\UpdateReviewsRequest;
+use App\Models\Reviews;
 
-class ProfessionalProfilesController extends Controller
+class ReviewsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class ProfessionalProfilesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProfessionalProfilesRequest $request)
+    public function store(StoreReviewsRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class ProfessionalProfilesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ProfessionalProfiles $professionalProfiles)
+    public function show(Reviews $reviews)
     {
         //
     }
@@ -43,7 +44,7 @@ class ProfessionalProfilesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ProfessionalProfiles $professionalProfiles)
+    public function edit(Reviews $reviews)
     {
         //
     }
@@ -51,7 +52,7 @@ class ProfessionalProfilesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProfessionalProfilesRequest $request, ProfessionalProfiles $professionalProfiles)
+    public function update(UpdateReviewsRequest $request, Reviews $reviews)
     {
         //
     }
@@ -59,7 +60,7 @@ class ProfessionalProfilesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProfessionalProfiles $professionalProfiles)
+    public function destroy(Reviews $reviews)
     {
         //
     }

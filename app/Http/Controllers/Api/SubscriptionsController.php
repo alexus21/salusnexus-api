@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Reviews;
-use App\Http\Requests\StoreReviewsRequest;
-use App\Http\Requests\UpdateReviewsRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSubscriptionsRequest;
+use App\Http\Requests\UpdateSubscriptionsRequest;
+use App\Models\Subscriptions;
 
-class ReviewsController extends Controller
+class SubscriptionsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class ReviewsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreReviewsRequest $request)
+    public function store(StoreSubscriptionsRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class ReviewsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Reviews $reviews)
+    public function show(Subscriptions $subscriptions)
     {
         //
     }
@@ -43,7 +44,7 @@ class ReviewsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Reviews $reviews)
+    public function edit(Subscriptions $subscriptions)
     {
         //
     }
@@ -51,7 +52,7 @@ class ReviewsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateReviewsRequest $request, Reviews $reviews)
+    public function update(UpdateSubscriptionsRequest $request, Subscriptions $subscriptions)
     {
         //
     }
@@ -59,7 +60,7 @@ class ReviewsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Reviews $reviews)
+    public function destroy(Subscriptions $subscriptions)
     {
         //
     }

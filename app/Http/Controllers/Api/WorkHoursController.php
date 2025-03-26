@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\ProfileViews;
-use App\Http\Requests\StoreProfileViewsRequest;
-use App\Http\Requests\UpdateProfileViewsRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreWorkHoursRequest;
+use App\Http\Requests\UpdateWorkHoursRequest;
+use App\Models\WorkHours;
 
-class ProfileViewsController extends Controller
+class WorkHoursController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class ProfileViewsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProfileViewsRequest $request)
+    public function store(StoreWorkHoursRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class ProfileViewsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ProfileViews $profileViews)
+    public function show(WorkHours $workHours)
     {
         //
     }
@@ -43,7 +44,7 @@ class ProfileViewsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ProfileViews $profileViews)
+    public function edit(WorkHours $workHours)
     {
         //
     }
@@ -51,7 +52,7 @@ class ProfileViewsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProfileViewsRequest $request, ProfileViews $profileViews)
+    public function update(UpdateWorkHoursRequest $request, WorkHours $workHours)
     {
         //
     }
@@ -59,7 +60,7 @@ class ProfileViewsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProfileViews $profileViews)
+    public function destroy(WorkHours $workHours)
     {
         //
     }
