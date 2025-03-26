@@ -20,7 +20,6 @@ return new class extends Migration {
             $table->string('clinic_address_1', 255)->nullable();
             $table->string('clinic_address_2', 255)->nullable();
             $table->foreignId('clinic_city_id')->constrained('cities')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('clinic_department_id')->constrained('departments')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal('clinic_latitude', 10, 8)->nullable();
             $table->decimal('clinic_longitude', 11, 8)->nullable();
             $table->boolean('home_visits')->default(false);

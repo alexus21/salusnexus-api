@@ -24,10 +24,6 @@ return new class extends Migration {
                 ->constrained('cities')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignId('department_id')
-                ->constrained('departments')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
             $table->decimal('home_latitude', 10, 8);
             $table->decimal('home_longitude', 11, 8);
             $table->string('emergency_contact_name', 200);
