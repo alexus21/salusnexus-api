@@ -7,11 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Run the migrations.
-     *
-     * CREATE INDEX idx_participantes_conversacion_usuario_id ON participantes_conversacion (usuario_id);
-     * CREATE INDEX idx_mensajes_conversacion_id ON mensajes (conversacion_id);
-     * CREATE INDEX idx_mensajes_remitente_usuario_id ON mensajes (remitente_usuario_id);
-     * CREATE INDEX idx_mensajes_enviado_en ON mensajes (enviado_en);
      */
     public function up(): void {
         Schema::table('users', function (Blueprint $table) {

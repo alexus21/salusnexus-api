@@ -7,17 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Run the migrations.
-     *
-     * CREATE TABLE consejos_salud
-     * (
-     * consejo_id          SERIAL PRIMARY KEY,
-     * titulo              VARCHAR(255) NOT NULL,
-     * contenido           TEXT         NOT NULL,
-     * categoria           VARCHAR(100),
-     * etiquetas_audiencia VARCHAR(255),
-     * fecha_publicacion   DATE DEFAULT CURRENT_DATE,
-     * referencia_fuente   VARCHAR(512)
-     * );
      */
     public function up(): void {
         Schema::create('health_tips', function (Blueprint $table) {
