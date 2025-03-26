@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -10,10 +9,10 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('specialities', function (Blueprint $table) {
+        Schema::create('health_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 150)->unique();
-            $table->string('description', 512)->nullable();
+            $table->string('name', 255);
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -22,6 +21,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        DB::statement('DROP TABLE IF EXISTS specialities CASCADE');
+        Schema::dropIfExists('health_categories');
     }
 };
