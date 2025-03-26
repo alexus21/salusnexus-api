@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('phone', 20)->unique()->nullable();
             $table->string('email', 100)->unique();
             $table->string('password');
-            $table->enum('tipo_usuario', ['paciente', 'profesional']);
+            $table->enum('user_type', ['paciente', 'profesional']);
             $table->string('profile_photo_path', 512)->nullable();
             $table->boolean('active')->default(true);
             $table->timestamp('email_verified_at')->nullable();

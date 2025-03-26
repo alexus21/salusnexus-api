@@ -10,21 +10,24 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        DB::statement("CREATE TYPE rol_usuario AS ENUM ('paciente', 'profesional')");
-        DB::statement("CREATE TYPE tipo_plan_suscripcion AS ENUM ('paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado')");
-        DB::statement("CREATE TYPE estado_suscripcion AS ENUM ('activa', 'cancelada', 'expirada', 'prueba', 'pago_pendiente')");
-        DB::statement("CREATE TYPE estado_cita AS ENUM ('programada', 'completada', 'cancelada_paciente', 'cancelada_profesional', 'no_asistio', 'pendiente_confirmacion')");
-        DB::statement("CREATE TYPE tipo_servicio AS ENUM ('consultorio', 'domicilio')");
+        DB::statement("CREATE TYPE user_rol AS ENUM ('paciente', 'profesional')");
+        DB::statement("CREATE TYPE type_subscription_plan AS
+                ENUM ('paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado')");
+        DB::statement("CREATE TYPE suscription_status AS
+                ENUM ('activa', 'cancelada', 'expirada', 'prueba', 'pago_pendiente')");
+        DB::statement("CREATE TYPE appointment_status AS
+                ENUM ('programada', 'completada', 'cancelada_paciente', 'cancelada_profesional', 'no_asistio', 'pendiente_confirmacion')");
+        DB::statement("CREATE TYPE service_type AS ENUM ('consultorio', 'domicilio')");
     }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void {
-        DB::statement("DROP TYPE rol_usuario");
-        DB::statement("DROP TYPE tipo_plan_suscripcion");
-        DB::statement("DROP TYPE estado_suscripcion");
-        DB::statement("DROP TYPE estado_cita");
-        DB::statement("DROP TYPE tipo_servicio");
+        DB::statement("DROP TYPE user_rol");
+        DB::statement("DROP TYPE type_subscription_plan");
+        DB::statement("DROP TYPE suscription_status");
+        DB::statement("DROP TYPE appointment_status");
+        DB::statement("DROP TYPE service_type");
     }
 };

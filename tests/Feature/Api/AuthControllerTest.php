@@ -25,12 +25,8 @@ class AuthControllerTest extends TestCase {
         $userData = [
             'first_name' => 'Juan',
             'last_name' => 'Pérez',
-            'gender' => 'required|string|in:M,F',
-            'date_of_birth' => '1990-05-15',
-            'age' => 33,
             'phone' => '+503 +12234567890',
             'email' => 'juan.perez@example.com',
-            'address' => 'Calle Falsa 123, Ciudad',
             'password' => 'secret123',
             'confirm_password' => 'secret123'
         ];
@@ -51,12 +47,8 @@ class AuthControllerTest extends TestCase {
                         'id',
                         'first_name',
                         'last_name',
-                        'gender',
-                        'date_of_birth',
-                        'age',
                         'phone',
                         'email',
-                        'address',
                         'created_at',
                         'updated_at'
                     ],

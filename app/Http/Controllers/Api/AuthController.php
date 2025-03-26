@@ -27,12 +27,8 @@ class AuthController extends Controller {
         $rules = [
             'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
             'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
-            'sex' => 'required|string|in:M,F',           // Sexo obligatorio y debe ser "M" o "F"
-            'date_of_birth' => 'required|date|before:today', // Fecha de nacimiento obligatoria, válida y anterior a hoy
-            'age' => 'required|integer|min:18',             // Edad obligatoria, entero y mayor o igual a 18
             'phone' => 'required|string',                   // Teléfono obligatorio y debe ser texto
             'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
-            'address' => 'required|string',                 // Dirección obligatoria y debe ser texto
             'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
             'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
         ];
@@ -43,20 +39,11 @@ class AuthController extends Controller {
             'first_name.string' => 'El nombre debe ser texto',
             'last_name.required' => 'El apellido es requerido',
             'last_name.string' => 'El apellido debe ser texto',
-            'sex.required' => 'El sexo es requerido',
-            'date_of_birth.required' => 'La fecha de nacimiento es requerida',
-            'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida',
-            'date_of_birth.before' => 'La fecha de nacimiento departamento ser anterior a la fecha actual',
-            'age.required' => 'La edad es requerida',
-            'age.integer' => 'La edad debe ser un número entero',
-            'age.min' => 'La edad debe ser mayor de 18 años',
             'phone.required' => 'El teléfono es requerido',
             'phone.string' => 'El teléfono debe ser texto',
             'email.required' => 'El correo electrónico es requerido',
             'email.email' => 'El correo electrónico debe ser válido',
             'email.unique' => 'El correo electrónico ya está en uso',
-            'address.required' => 'La dirección es requerida',
-            'address.string' => 'La dirección debe ser texto',
             'password.required' => 'La contraseña es requerida',
             'password.string' => 'La contraseña debe ser texto',
             'confirm_password.required' => 'La confirmación de contraseña es requerida',
@@ -100,12 +87,8 @@ class AuthController extends Controller {
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'sex' => $request->sex,
-            'date_of_birth' => $request->date_of_birth,
-            'age' => $request->age,
             'phone' => $phone,
             'email' => $request->email,
-            'address' => $request->address,
             'password' => Hash::make($request->password), // Encriptar la contraseña con Hash,
             'email_verified_at' => Carbon::now() // Marcar el correo como verificado
         ]);
