@@ -32,6 +32,10 @@ return new class extends Migration {
             $table->text('contraindications')->nullable();
             $table->text('dose_info')->nullable();
             $table->string('image_url', 512)->nullable();
+            $table->foreignId('category_id')
+                ->constrained('medications_categories')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->timestamps();
         });
     }

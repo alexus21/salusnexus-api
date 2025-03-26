@@ -24,7 +24,10 @@ return new class extends Migration {
             $table->id();
             $table->string('title', 255);
             $table->text('content');
-            $table->string('category', 100)->nullable();
+            $table->foreignId('category_id')
+                ->constrained('health_categories')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->string('audience_tags', 255)->nullable();
             $table->date('publication_date')->default(now());
             $table->string('source_reference', 512)->nullable();

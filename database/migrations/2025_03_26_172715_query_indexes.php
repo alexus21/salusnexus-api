@@ -70,7 +70,7 @@ return new class extends Migration {
         });
 
         Schema::table('health_tips', function (Blueprint $table) {
-            $table->index('category', 'idx_consejos_salud_categoria');
+            $table->index('category_id', 'idx_consejos_salud_categoria');
         });
 
         /*Schema::table('conversation_participants', function (Blueprint $table) {
