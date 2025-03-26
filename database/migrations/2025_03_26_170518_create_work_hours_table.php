@@ -7,18 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Run the migrations.
-     *
-     *
-     * CREATE TABLE horas_trabajo
-     * (
-     * horas_trabajo_id      SERIAL PRIMARY KEY,
-     * perfil_profesional_id INT                    NOT NULL REFERENCES perfiles_profesionales (perfil_id) ON DELETE CASCADE,
-     * dia_semana            SMALLINT               NOT NULL CHECK (dia_semana >= 0 AND dia_semana <= 6),
-     * hora_inicio           TIME WITHOUT TIME ZONE NOT NULL,
-     * hora_fin              TIME WITHOUT TIME ZONE NOT NULL,
-     * esta_disponible       BOOLEAN DEFAULT TRUE,
-     * CONSTRAINT unica_hora_trabajo UNIQUE (perfil_profesional_id, dia_semana, hora_inicio)
-     * );
      */
     public function up(): void {
         Schema::create('work_hours', function (Blueprint $table) {

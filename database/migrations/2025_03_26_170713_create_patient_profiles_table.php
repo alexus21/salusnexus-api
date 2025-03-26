@@ -7,22 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Run the migrations.
-     *
-     * CREATE TABLE perfiles_pacientes
-     * (
-     * perfil_id                    SERIAL PRIMARY KEY,
-     * usuario_id                   INT UNIQUE NOT NULL REFERENCES usuarios (usuario_id) ON DELETE CASCADE,
-     * fecha_nacimiento             DATE,
-     * genero                       VARCHAR(50),
-     * direccion_domicilio_1        VARCHAR(255),
-     * direccion_domicilio_2        VARCHAR(255),
-     * ciudad_domicilio             VARCHAR(100),
-     * departamento_domicilio       VARCHAR(100),
-     * latitud_domicilio            DECIMAL(10, 8),
-     * longitud_domicilio           DECIMAL(11, 8),
-     * nombre_contacto_emergencia   VARCHAR(200),
-     * telefono_contacto_emergencia VARCHAR(20)
-     * );
      */
     public function up(): void {
         Schema::create('patient_profiles', function (Blueprint $table) {

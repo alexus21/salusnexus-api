@@ -7,21 +7,6 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Run the migrations.
-     *
-     * CREATE TABLE suscripciones
-     * (
-     * suscripcion_id                SERIAL PRIMARY KEY,
-     * usuario_id                    INT                      NOT NULL REFERENCES usuarios (usuario_id) ON DELETE CASCADE,
-     * tipo_plan                     tipo_plan_suscripcion    NOT NULL,
-     * estado                        estado_suscripcion       NOT NULL,
-     * fecha_inicio                  TIMESTAMP WITH TIME ZONE NOT NULL,
-     * fecha_fin                     TIMESTAMP WITH TIME ZONE,
-     * prueba_termina_en             TIMESTAMP WITH TIME ZONE,
-     * auto_renueva                  BOOLEAN                  DEFAULT FALSE,
-     * id_suscripcion_proveedor_pago VARCHAR(255),
-     * creado_en                     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-     * actualizado_en                TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-     * );
      */
     public function up(): void {
         Schema::create('subscriptions', function (Blueprint $table) {
