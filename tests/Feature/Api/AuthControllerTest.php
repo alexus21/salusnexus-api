@@ -25,6 +25,7 @@ class AuthControllerTest extends TestCase {
         $userData = [
             'first_name' => 'Juan',
             'last_name' => 'Pérez',
+            'gender' => 'required|string|in:M,F',
             'date_of_birth' => '1990-05-15',
             'age' => 33,
             'phone' => '+503 +12234567890',
@@ -50,6 +51,7 @@ class AuthControllerTest extends TestCase {
                         'id',
                         'first_name',
                         'last_name',
+                        'gender',
                         'date_of_birth',
                         'age',
                         'phone',
@@ -104,6 +106,7 @@ class AuthControllerTest extends TestCase {
         $user = User::factory()->create([
                 'first_name' => 'Juan',
                 'last_name' => 'Pérez',
+                'sex' => 'M',
                 'date_of_birth' => '1990-05-15',
                 'age' => 33,
                 'phone' => '+503 +12234567890',
