@@ -24,9 +24,10 @@ class User extends Authenticatable {
         'phone',
         'email',
         'password',
-        'tipo_usuario',
+        'user_rol',
         'profile_photo_path',
         'active',
+        'email_verified_at',
     ];
 
     /**

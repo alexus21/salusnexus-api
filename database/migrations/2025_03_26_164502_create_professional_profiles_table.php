@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->decimal('clinic_latitude', 10, 8)->nullable();
             $table->decimal('clinic_longitude', 11, 8)->nullable();
             $table->boolean('home_visits')->default(false);
-            $table->integer('years_experience')->nullable();
+            $table->integer('years_of_experience')->nullable();
             $table->string('website_url', 512)->nullable();
             $table->timestamps();
         });

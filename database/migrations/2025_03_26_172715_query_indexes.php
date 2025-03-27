@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::table('users', function (Blueprint $table) {
             $table->index('email', 'idx_usuarios_email');
-            $table->index('user_type', 'idx_usuarios_tipo_usuario');
+            $table->index('user_rol', 'idx_usuarios_tipo_usuario');
         });
 
         Schema::table('professional_profiles', function (Blueprint $table) {

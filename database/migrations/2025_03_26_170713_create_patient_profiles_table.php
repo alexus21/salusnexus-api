@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->date('date_of_birth')->check('date_of_birth <= NOW()');
             $table->enum('gender', ['masculino', 'femenino']);
             $table->string('home_address_1', 255);
-            $table->string('home_address_2', 255);
+            $table->string('home_address_2', 255)->nullable();
             $table->foreignId('city_id')
                 ->constrained('cities')
                 ->onDelete('cascade')
