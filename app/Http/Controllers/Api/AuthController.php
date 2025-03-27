@@ -25,117 +25,12 @@ class AuthController extends Controller {
      * @return JsonResponse Respuesta JSON con el resultado del registro.
      */
     public function register(Request $request): JsonResponse {
-        // Reglas de validación para los campos del formulario
-        $rules = [
-            'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
-            'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
-            'phone' => 'required|string',                   // Teléfono obligatorio y debe ser texto
-            'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
-            'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
-            'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
-            'user_rol' => 'required|in:paciente,profesional',                 // Tipo de usuario obligatorio y debe ser texto
-            'profile_photo_path' => 'nullable|image',              // Foto de perfil opcional y debe ser una imagen
-        ];
+        $this->validateUser($request);
 
-        if ($request->user_type == 'paciente') {
-            $rules += [
-                // Requerido para los pacientes:
-                'date_of_birth' => 'required|date',
-                'gender' => 'required|string',
-                'home_address_1' => 'required|string',
-                'home_address_2' => 'nullable|string',
-                'city_id' => 'required|string',
-                'home_latitude' => 'required|string',
-                'home_longitude' => 'required|string',
-                'emergency_contact_name' => 'required|string',
-                'emergency_contact_phone' => 'required|string',
-            ];
-        } else if ($request->user_type == 'Profesional') {
-            $rules += [
-                // Requerido para los profesionales:
-                'license_number' => 'required|string',
-                'biography' => 'required|string',
-                'clinic_name' => 'required|string',
-                'clinic_address_1' => 'required|string',
-                'clinic_address_2' => 'nullable|string',
-                'clinic_city_id' => 'required|string',
-                'clinic_latitude' => 'required|string',
-                'clinic_longitude' => 'required|string',
-                'home_visits' => 'required|boolean',
-                'years_of_experience' => 'required|integer',
-                'website_url' => 'nullable|string',
-            ];
-        }
-
-        // Mensajes personalizados para errores de validación
-        $messages = [
-            'first_name.required' => 'El nombre es requerido',
-            'first_name.string' => 'El nombre debe ser texto',
-            'last_name.required' => 'El apellido es requerido',
-            'last_name.string' => 'El apellido debe ser texto',
-            'phone.required' => 'El teléfono es requerido',
-            'phone.string' => 'El teléfono debe ser texto',
-            'email.required' => 'El correo electrónico es requerido',
-            'email.email' => 'El correo electrónico debe ser válido',
-            'email.unique' => 'El correo electrónico ya está en uso',
-            'password.required' => 'La contraseña es requerida',
-            'password.string' => 'La contraseña debe ser texto',
-            'confirm_password.required' => 'La confirmación de contraseña es requerida',
-            'confirm_password.string' => 'La confirmación de contraseña debe ser texto',
-            'confirm_password.same' => 'Las contraseñas no coinciden',
-
-            // Mensajes personalizados para errores de validación
-            'date_of_birth.required' => 'La fecha de nacimiento es requerida.',
-            'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida.',
-            'gender.required' => 'El género es requerido.',
-            'gender.string' => 'El género debe ser una cadena de texto.',
-            'home_address_1.required' => 'La dirección del hogar 1 es requerida.',
-            'home_address_1.string' => 'La dirección del hogar 1 debe ser una cadena de texto.',
-            'home_address_2.string' => 'La dirección del hogar 2 debe ser una cadena de texto.',
-            'city_id.required' => 'La ciudad es requerida.',
-            'city_id.string' => 'La ciudad debe ser una cadena de texto.',
-            'home_latitude.required' => 'La latitud del hogar es requerida.',
-            'home_latitude.string' => 'La latitud del hogar debe ser una cadena de texto.',
-            'home_longitude.required' => 'La longitud del hogar es requerida.',
-            'home_longitude.string' => 'La longitud del hogar debe ser una cadena de texto.',
-            'emergency_contact_name.required' => 'El nombre del contacto de emergencia es requerido.',
-            'emergency_contact_name.string' => 'El nombre del contacto de emergencia debe ser una cadena de texto.',
-            'emergency_contact_phone.required' => 'El teléfono del contacto de emergencia es requerido.',
-            'emergency_contact_phone.string' => 'El teléfono del contacto de emergencia debe ser una cadena de texto.',
-
-            // Mensajes personalizados para errores de validación
-            'license_number.required' => 'El número de licencia es requerido.',
-            'license_number.string' => 'El número de licencia debe ser una cadena de texto.',
-            'biography.required' => 'La biografía es requerida.',
-            'biography.string' => 'La biografía debe ser una cadena de texto.',
-            'clinic_name.required' => 'El nombre de la clínica es requerido.',
-            'clinic_name.string' => 'El nombre de la clínica debe ser una cadena de texto.',
-            'clinic_address_1.required' => 'La dirección de la clínica 1 es requerida.',
-            'clinic_address_1.string' => 'La dirección de la clínica 1 debe ser una cadena de texto.',
-            'clinic_address_2.string' => 'La dirección de la clínica 2 debe ser una cadena de texto.',
-            'clinic_city_id.required' => 'La ciudad de la clínica es requerida.',
-            'clinic_city_id.string' => 'La ciudad de la clínica debe ser una cadena de texto.',
-            'clinic_latitude.required' => 'La latitud de la clínica es requerida.',
-            'clinic_latitude.string' => 'La latitud de la clínica debe ser una cadena de texto.',
-            'clinic_longitude.required' => 'La longitud de la clínica es requerida.',
-            'clinic_longitude.string' => 'La longitud de la clínica debe ser una cadena de texto.',
-            'home_visits.required' => 'Las visitas a domicilio son requeridas.',
-            'home_visits.boolean' => 'Las visitas a domicilio deben ser un valor booleano.',
-            'years_of_experience.required' => 'Los años de experiencia son requeridos.',
-            'years_of_experience.integer' => 'Los años de experiencia deben ser un número entero.',
-            'website_url.string' => 'La URL del sitio web debe ser una cadena de texto.',
-        ];
-
-        // Validación de los datos recibidos según las reglas y mensajes definidos
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        // Si la validación falla, devolver error con detalles
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error de validación',
-                'status' => false,
-                'errors' => $validator->errors() // Lista de errores específicos
-            ], 400); // Código HTTP 400: Solicitud incorrecta
+        if ($request->user_rol == 'paciente') {
+            $this->validatePatients($request);
+        } else if ($request->user_rol == 'profesional') {
+            $this->validateProfesionals($request);
         }
 
         // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
@@ -215,6 +110,155 @@ class AuthController extends Controller {
                 'status' => false,
             ], 500);
         }
+    }
+
+    private function validateUser(Request $request) {
+        // Reglas de validación para los campos del formulario
+        $rules = [
+            'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
+            'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
+            'phone' => 'required|string',                   // Teléfono obligatorio y debe ser texto
+            'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
+            'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
+            'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
+            'user_rol' => 'required|in:paciente,profesional',                 // Tipo de usuario obligatorio y debe ser texto
+            'profile_photo_path' => 'nullable|image',              // Foto de perfil opcional y debe ser una imagen
+        ];
+
+        // Mensajes personalizados para errores de validación
+        $messages = [
+            'first_name.required' => 'El nombre es requerido',
+            'first_name.string' => 'El nombre debe ser texto',
+            'last_name.required' => 'El apellido es requerido',
+            'last_name.string' => 'El apellido debe ser texto',
+            'phone.required' => 'El teléfono es requerido',
+            'phone.string' => 'El teléfono debe ser texto',
+            'email.required' => 'El correo electrónico es requerido',
+            'email.email' => 'El correo electrónico debe ser válido',
+            'email.unique' => 'El correo electrónico ya está en uso',
+            'password.required' => 'La contraseña es requerida',
+            'password.string' => 'La contraseña debe ser texto',
+            'confirm_password.required' => 'La confirmación de contraseña es requerida',
+            'confirm_password.string' => 'La confirmación de contraseña debe ser texto',
+            'confirm_password.same' => 'Las contraseñas no coinciden',
+        ];
+
+        // Validación de los datos recibidos según las reglas y mensajes definidos
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        // Si la validación falla, devolver error con detalles
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'status' => false,
+                'errors' => $validator->errors() // Lista de errores específicos
+            ], 400); // Código HTTP 400: Solicitud incorrecta
+        }
+
+        return true;
+    }
+
+    private function validatePatients(Request $request): true|JsonResponse {
+        $rules = [
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string',
+            'home_address_1' => 'required|string',
+            'home_address_2' => 'nullable|string',
+            'city_id' => 'required|string',
+            'home_latitude' => 'required|string',
+            'home_longitude' => 'required|string',
+            'emergency_contact_name' => 'required|string',
+            'emergency_contact_phone' => 'required|string',
+        ];
+
+        $messages = [
+            'date_of_birth.required' => 'La fecha de nacimiento es requerida.',
+            'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida.',
+            'gender.required' => 'El género es requerido.',
+            'gender.string' => 'El género debe ser una cadena de texto.',
+            'home_address_1.required' => 'La dirección del hogar 1 es requerida.',
+            'home_address_1.string' => 'La dirección del hogar 1 debe ser una cadena de texto.',
+            'home_address_2.string' => 'La dirección del hogar 2 debe ser una cadena de texto.',
+            'city_id.required' => 'La ciudad es requerida.',
+            'city_id.string' => 'La ciudad debe ser una cadena de texto.',
+            'home_latitude.required' => 'La latitud del hogar es requerida.',
+            'home_latitude.string' => 'La latitud del hogar debe ser una cadena de texto.',
+            'home_longitude.required' => 'La longitud del hogar es requerida.',
+            'home_longitude.string' => 'La longitud del hogar debe ser una cadena de texto.',
+            'emergency_contact_name.required' => 'El nombre del contacto de emergencia es requerido.',
+            'emergency_contact_name.string' => 'El nombre del contacto de emergencia debe ser una cadena de texto.',
+            'emergency_contact_phone.required' => 'El teléfono del contacto de emergencia es requerido.',
+            'emergency_contact_phone.string' => 'El teléfono del contacto de emergencia debe ser una cadena de texto.',
+        ];
+
+        // Validación de los datos recibidos según las reglas y mensajes definidos
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        // Si la validación falla, devolver error con detalles
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'status' => false,
+                'errors' => $validator->errors() // Lista de errores específicos
+            ], 400); // Código HTTP 400: Solicitud incorrecta
+        }
+
+        return true;
+    }
+
+    private function validateProfesionals(Request $request): true|JsonResponse {
+        $rules = [
+            // Requerido para los profesionales:
+            'license_number' => 'required|string',
+            'biography' => 'required|string',
+            'clinic_name' => 'required|string',
+            'clinic_address_1' => 'required|string',
+            'clinic_address_2' => 'nullable|string',
+            'clinic_city_id' => 'required|string',
+            'clinic_latitude' => 'required|string',
+            'clinic_longitude' => 'required|string',
+            'home_visits' => 'required|boolean',
+            'years_of_experience' => 'required|integer',
+            'website_url' => 'nullable|string',
+        ];
+
+        $messages = [
+            // Mensajes personalizados para errores de validación
+            'license_number.required' => 'El número de licencia es requerido.',
+            'license_number.string' => 'El número de licencia debe ser una cadena de texto.',
+            'biography.required' => 'La biografía es requerida.',
+            'biography.string' => 'La biografía debe ser una cadena de texto.',
+            'clinic_name.required' => 'El nombre de la clínica es requerido.',
+            'clinic_name.string' => 'El nombre de la clínica debe ser una cadena de texto.',
+            'clinic_address_1.required' => 'La dirección de la clínica 1 es requerida.',
+            'clinic_address_1.string' => 'La dirección de la clínica 1 debe ser una cadena de texto.',
+            'clinic_address_2.string' => 'La dirección de la clínica 2 debe ser una cadena de texto.',
+            'clinic_city_id.required' => 'La ciudad de la clínica es requerida.',
+            'clinic_city_id.string' => 'La ciudad de la clínica debe ser una cadena de texto.',
+            'clinic_latitude.required' => 'La latitud de la clínica es requerida.',
+            'clinic_latitude.string' => 'La latitud de la clínica debe ser una cadena de texto.',
+            'clinic_longitude.required' => 'La longitud de la clínica es requerida.',
+            'clinic_longitude.string' => 'La longitud de la clínica debe ser una cadena de texto.',
+            'home_visits.required' => 'Las visitas a domicilio son requeridas.',
+            'home_visits.boolean' => 'Las visitas a domicilio deben ser un valor booleano.',
+            'years_of_experience.required' => 'Los años de experiencia son requeridos.',
+            'years_of_experience.integer' => 'Los años de experiencia deben ser un número entero.',
+            'website_url.string' => 'La URL del sitio web debe ser una cadena de texto.',
+        ];
+
+        // Validación de los datos recibidos según las reglas y mensajes definidos
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        // Si la validación falla, devolver error con detalles
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'status' => false,
+                'errors' => $validator->errors() // Lista de errores específicos
+            ], 400); // Código HTTP 400: Solicitud incorrecta
+        }
+
+        return true;
     }
 
     /**
