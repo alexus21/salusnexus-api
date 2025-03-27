@@ -127,7 +127,7 @@ class AuthController extends Controller {
         $rules = [
             'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
             'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
-            'phone' => 'required|string',                   // Teléfono obligatorio y debe ser texto
+            'phone' => 'required',                   // Teléfono obligatorio y debe ser texto
             'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
             'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
             'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
@@ -142,7 +142,6 @@ class AuthController extends Controller {
             'last_name.required' => 'El apellido es requerido',
             'last_name.string' => 'El apellido debe ser texto',
             'phone.required' => 'El teléfono es requerido',
-            'phone.string' => 'El teléfono debe ser texto',
             'email.required' => 'El correo electrónico es requerido',
             'email.email' => 'El correo electrónico debe ser válido',
             'email.unique' => 'El correo electrónico ya está en uso',
@@ -174,11 +173,11 @@ class AuthController extends Controller {
             'date_of_birth' => 'required|date',
             'gender' => 'required|string',
             'home_address_1' => 'required|string',
-            'home_latitude' => 'required|string',
-            'home_longitude' => 'required|string',
+            'home_latitude' => 'required',
+            'home_longitude' => 'required',
             'home_address_reference' => 'nullable|string',
             'emergency_contact_name' => 'required|string',
-            'emergency_contact_phone' => 'required|string',
+            'emergency_contact_phone' => 'required',
         ];
 
         $messages = [
@@ -195,7 +194,6 @@ class AuthController extends Controller {
             'emergency_contact_name.required' => 'El nombre del contacto de emergencia es requerido.',
             'emergency_contact_name.string' => 'El nombre del contacto de emergencia debe ser una cadena de texto.',
             'emergency_contact_phone.required' => 'El teléfono del contacto de emergencia es requerido.',
-            'emergency_contact_phone.string' => 'El teléfono del contacto de emergencia debe ser una cadena de texto.',
         ];
 
         // Validación de los datos recibidos según las reglas y mensajes definidos
