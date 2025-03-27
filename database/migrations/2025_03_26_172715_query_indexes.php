@@ -16,7 +16,6 @@ return new class extends Migration {
 
         Schema::table('professional_profiles', function (Blueprint $table) {
             $table->index('user_id', 'idx_perfiles_profesionales_usuario_id');
-            $table->index('clinic_city_id', 'idx_perfiles_profesionales_ciudad');
         });
 
         Schema::table('professional_specialities', function (Blueprint $table) {
@@ -89,7 +88,6 @@ return new class extends Migration {
 
         Schema::table('professional_profiles', function (Blueprint $table) {
             $table->dropIndex('idx_perfiles_profesionales_usuario_id');
-            $table->dropIndex('idx_perfiles_profesionales_ciudad');
             $table->dropIndex('idx_perfiles_profesionales_departamento');
         });
 

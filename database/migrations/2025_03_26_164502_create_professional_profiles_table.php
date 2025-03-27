@@ -18,10 +18,9 @@ return new class extends Migration {
             $table->text('biography')->nullable();
             $table->string('clinic_name', 200)->nullable();
             $table->string('clinic_address_1', 255)->nullable();
-            $table->string('clinic_address_2', 255)->nullable();
-            $table->foreignId('clinic_city_id')->constrained('cities')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal('clinic_latitude', 10, 8)->nullable();
             $table->decimal('clinic_longitude', 11, 8)->nullable();
+            $table->string('clinic_address_reference', 255)->nullable();
             $table->boolean('home_visits')->default(false);
             $table->integer('years_of_experience')->nullable();
             $table->string('website_url', 512)->nullable();
