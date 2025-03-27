@@ -33,25 +33,7 @@ class AuthController extends Controller {
             $this->validateProfesionals($request);
         }
 
-        // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
-        $phone = str_starts_with($request->phone, "+503") ? $request->phone : "+503 " . $request->phone;
-        // Formatear el teléfono al estilo "+503 XXXX-XXXX"
-        $phone = preg_replace('/(\+503)\s?(\d{4})(\d{4})/', '$1 $2-$3', $phone);
-
-        // Verificar si el teléfono ya está registrado en la base de datos
-        $user = DB::table('users')
-            ->select('phone')
-            ->where('phone', $phone)
-            ->first();
-
-        // Si el teléfono ya existe, devolver error
-        if ($user) {
-            return response()->json([
-                'message' => 'El teléfono ingresado ya está en uso',
-                'status' => false,
-                'errors' => ['telefono' => ['El teléfono ingresado ya está en uso']]
-            ], 400); // Código HTTP 400: Solicitud incorrecta
-        }
+        $phone = $this->formatPhoneNumber($request);
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -65,9 +47,7 @@ class AuthController extends Controller {
         ]);
 
         try {
-            // Almacenar la respuesta del controlador
-            $profileResponse = null;
-
+            // Almacenar la respuesta del controlador de perfiles
             if ($request->user_rol == 'paciente') {
                 $profileResponse = (new PatientProfilesController())->create($request, $user->id);
             } else if ($request->user_rol == 'profesional') {
@@ -112,7 +92,31 @@ class AuthController extends Controller {
         }
     }
 
-    private function validateUser(Request $request) {
+    private function formatPhoneNumber(Request $request): array|JsonResponse|string|null {
+        // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
+        $phone = str_starts_with($request->phone, "+503") ? $request->phone : "+503 " . $request->phone;
+        // Formatear el teléfono al estilo "+503 XXXX-XXXX"
+        $phone = preg_replace('/(\+503)\s?(\d{4})(\d{4})/', '$1 $2-$3', $phone);
+
+        // Verificar si el teléfono ya está registrado en la base de datos
+        $user = DB::table('users')
+            ->select('phone')
+            ->where('phone', $phone)
+            ->first();
+
+        // Si el teléfono ya existe, devolver error
+        if ($user) {
+            return response()->json([
+                'message' => 'El teléfono ingresado ya está en uso',
+                'status' => false,
+                'errors' => ['telefono' => ['El teléfono ingresado ya está en uso']]
+            ], 400); // Código HTTP 400: Solicitud incorrecta
+        }
+
+        return $phone;
+    }
+
+    private function validateUser(Request $request): void {
         // Reglas de validación para los campos del formulario
         $rules = [
             'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
@@ -148,17 +152,16 @@ class AuthController extends Controller {
 
         // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
-            return response()->json([
+            response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
                 'errors' => $validator->errors() // Lista de errores específicos
-            ], 400); // Código HTTP 400: Solicitud incorrecta
+            ], 400);
+            // Código HTTP 400: Solicitud incorrecta
         }
-
-        return true;
     }
 
-    private function validatePatients(Request $request): true|JsonResponse {
+    private function validatePatients(Request $request): void {
         $rules = [
             'date_of_birth' => 'required|date',
             'gender' => 'required|string',
@@ -196,17 +199,16 @@ class AuthController extends Controller {
 
         // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
-            return response()->json([
+            response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
                 'errors' => $validator->errors() // Lista de errores específicos
-            ], 400); // Código HTTP 400: Solicitud incorrecta
+            ], 400);
+            // Código HTTP 400: Solicitud incorrecta
         }
-
-        return true;
     }
 
-    private function validateProfesionals(Request $request): true|JsonResponse {
+    private function validateProfesionals(Request $request): void {
         $rules = [
             // Requerido para los profesionales:
             'license_number' => 'required|string',
@@ -251,14 +253,14 @@ class AuthController extends Controller {
 
         // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
-            return response()->json([
+            response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
                 'errors' => $validator->errors() // Lista de errores específicos
-            ], 400); // Código HTTP 400: Solicitud incorrecta
+            ], 400);
+            // Código HTTP 400: Solicitud incorrecta
         }
 
-        return true;
     }
 
     /**
