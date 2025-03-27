@@ -25,12 +25,18 @@ class AuthController extends Controller {
      * @return JsonResponse Respuesta JSON con el resultado del registro.
      */
     public function register(Request $request): JsonResponse {
-        $this->validateUser($request);
+        if($validation = $this->validateUser($request)){
+            return $validation;
+        }
 
         if ($request->user_rol == 'paciente') {
-            $this->validatePatients($request);
+            if ($validation = $this->validatePatients($request)) {
+                return $validation;
+            }
         } else if ($request->user_rol == 'profesional') {
-            $this->validateProfesionals($request);
+            if ($validation = $this->validateProfesionals($request)) {
+                return $validation;
+            }
         }
 
         $phone = $this->formatPhoneNumber($request);
@@ -60,7 +66,7 @@ class AuthController extends Controller {
             $profileData = json_decode($profileResponse->getContent());
 
             // Si hubo error en la creación del perfil, lanzar excepción
-            if (!$profileData->status) {
+            if (!$profileData) {
                 throw new Exception($profileData->message);
             }
 
@@ -116,7 +122,7 @@ class AuthController extends Controller {
         return $phone;
     }
 
-    private function validateUser(Request $request): void {
+    private function validateUser(Request $request): ?JsonResponse {
         // Reglas de validación para los campos del formulario
         $rules = [
             'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
@@ -152,16 +158,18 @@ class AuthController extends Controller {
 
         // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
-            response()->json([
+            return response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
                 'errors' => $validator->errors() // Lista de errores específicos
             ], 400);
             // Código HTTP 400: Solicitud incorrecta
         }
+
+        return null;
     }
 
-    private function validatePatients(Request $request): void {
+    private function validatePatients(Request $request): ?JsonResponse {
         $rules = [
             'date_of_birth' => 'required|date',
             'gender' => 'required|string',
@@ -195,16 +203,18 @@ class AuthController extends Controller {
 
         // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
-            response()->json([
-                'message' => 'Error de validación',
+            return response()->json([
+                'message' => 'Error: ' . $validator->errors(),
                 'status' => false,
                 'errors' => $validator->errors() // Lista de errores específicos
             ], 400);
             // Código HTTP 400: Solicitud incorrecta
         }
+
+        return null;
     }
 
-    private function validateProfesionals(Request $request): void {
+    private function validateProfesionals(Request $request): ?JsonResponse {
         $rules = [
             // Requerido para los profesionales:
             'license_number' => 'required|string',
@@ -246,13 +256,15 @@ class AuthController extends Controller {
 
         // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
-            response()->json([
+            return response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
                 'errors' => $validator->errors() // Lista de errores específicos
             ], 400);
             // Código HTTP 400: Solicitud incorrecta
         }
+
+        return null;
 
     }
 
