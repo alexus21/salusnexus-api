@@ -22,4 +22,5 @@ Route::get('/cities/{department_id}', [CitiesController::class, 'getByDepartment
 Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::get('/validate', [AuthController::class, 'validateToken'])->name('auth.validateToken');
+    Route::get('/userprofile', [AuthController::class, 'profile'])->name('auth.userProfile');
 });

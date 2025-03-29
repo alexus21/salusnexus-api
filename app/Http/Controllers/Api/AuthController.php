@@ -374,4 +374,21 @@ class AuthController extends Controller {
             'status' => false
         ], 401);
     }
+
+    public function profile(Request $request): JsonResponse {
+        $user = (new User)->getUserInfoByItsId(Auth::user()->id);
+
+        if ($user) {
+            return response()->json([
+                'message' => 'Perfil obtenido correctamente',
+                'status' => true,
+                'data' => $user
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Token inválido',
+            'status' => false
+        ], 401);
+    }
 }
