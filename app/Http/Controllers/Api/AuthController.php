@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -355,5 +356,22 @@ class AuthController extends Controller {
             'message' => 'Sesión cerrada correctamente',
             'status' => true
         ]);
+    }
+
+    public function validateToken(Request $request): JsonResponse {
+        $user = Auth::user();
+
+        if ($user) {
+            return response()->json([
+                'message' => 'Token válido',
+                'status' => true,
+                'data' => $user
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Token inválido',
+            'status' => false
+        ], 401);
     }
 }

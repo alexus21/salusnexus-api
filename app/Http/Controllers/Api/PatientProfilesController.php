@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePatientProfilesRequest;
 use App\Http\Requests\UpdatePatientProfilesRequest;
 use App\Models\PatientProfiles;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -39,7 +40,7 @@ class PatientProfilesController extends Controller {
                 'status' => true,
                 'data' => $patient,
             ], 201); // Código HTTP 201: Recurso creado
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error al crear el perfil de paciente',
                 'status' => false,
