@@ -26,34 +26,52 @@ class AuthController extends Controller {
      * @return JsonResponse Respuesta JSON con el resultado del registro.
      */
     public function register(Request $request): JsonResponse {
-        if($validation = $this->validateUser($request)){
-            return $validation;
-        }
-
-        if ($request->user_rol == 'paciente') {
-            if ($validation = $this->validatePatients($request)) {
-                return $validation;
-            }
-        } else if ($request->user_rol == 'profesional') {
-            if ($validation = $this->validateProfesionals($request)) {
-                return $validation;
-            }
-        }
-
-        $phone = $this->formatPhoneNumber($request);
-
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'phone' => $phone,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'user_rol' => strtolower($request->user_rol),
-            'profile_photo_path' => $request->profile_photo_path,
-            'email_verified_at' => Carbon::now()
-        ]);
-
         try {
+            if ($validation = $this->validateUser($request)) {
+                return $validation;
+            }
+
+            if ($request->user_rol == 'paciente') {
+                if ($validation = $this->validatePatients($request)) {
+                    return $validation;
+                }
+            } else if ($request->user_rol == 'profesional') {
+                if ($validation = $this->validateProfesionals($request)) {
+                    return $validation;
+                }
+            }
+
+            // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
+            $phone = str_starts_with($request->phone, "+503") ? $request->phone : "+503 " . $request->phone;
+            // Formatear el teléfono al estilo "+503 XXXX-XXXX"
+            $phone = preg_replace('/(\+503)\s?(\d{4})(\d{4})/', '$1 $2-$3', $phone);
+
+            // Verificar si el teléfono ya está registrado en la base de datos
+            $user = DB::table('users')
+                ->select('phone')
+                ->where('phone', $phone)
+                ->first();
+
+            // Si el teléfono ya existe, devolver error
+            if ($user) {
+                return response()->json([
+                    'message' => 'El teléfono personal ingresado ya está en uso',
+                    'status' => false,
+                    'errors' => ['telefono' => ['El teléfono personal ingresado ya está en uso']]
+                ], 400); // Código HTTP 400: Solicitud incorrecta
+            }
+
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'phone' => $phone,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'user_rol' => strtolower($request->user_rol),
+                'profile_photo_path' => $request->profile_photo_path,
+                'email_verified_at' => Carbon::now()
+            ]);
+
             // Almacenar la respuesta del controlador de perfiles
             if ($request->user_rol == 'paciente') {
                 $profileResponse = (new PatientProfilesController())->create($request, $user->id);
@@ -91,36 +109,15 @@ class AuthController extends Controller {
 
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            User::destroy($user->id);
+            if (isset($user)) {
+                // Eliminar el usuario creado si hubo un error al crear el perfil
+                User::destroy($user->id);
+            }
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => false,
             ], 500);
         }
-    }
-
-    private function formatPhoneNumber(Request $request): array|JsonResponse|string|null {
-        // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
-        $phone = str_starts_with($request->phone, "+503") ? $request->phone : "+503 " . $request->phone;
-        // Formatear el teléfono al estilo "+503 XXXX-XXXX"
-        $phone = preg_replace('/(\+503)\s?(\d{4})(\d{4})/', '$1 $2-$3', $phone);
-
-        // Verificar si el teléfono ya está registrado en la base de datos
-        $user = DB::table('users')
-            ->select('phone')
-            ->where('phone', $phone)
-            ->first();
-
-        // Si el teléfono ya existe, devolver error
-        if ($user) {
-            return response()->json([
-                'message' => 'El teléfono ingresado ya está en uso',
-                'status' => false,
-                'errors' => ['telefono' => ['El teléfono ingresado ya está en uso']]
-            ], 400); // Código HTTP 400: Solicitud incorrecta
-        }
-
-        return $phone;
     }
 
     private function validateUser(Request $request): ?JsonResponse {

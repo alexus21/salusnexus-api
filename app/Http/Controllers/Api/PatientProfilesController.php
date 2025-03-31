@@ -32,7 +32,7 @@ class PatientProfilesController extends Controller {
                 'home_address_1' => $request->home_address_1,
                 'home_latitude' => $request->home_latitude,
                 'home_longitude' => $request->home_longitude,
-                'home_address_reference' => $request->home_address_2,
+                'home_address_reference' => $request->home_address_reference,
                 'emergency_contact_name' => $request->emergency_contact_name,
                 'emergency_contact_phone' => $emergency_contact_phone,
                 'user_id' => $user_id,
