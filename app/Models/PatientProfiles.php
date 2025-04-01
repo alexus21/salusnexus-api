@@ -15,7 +15,7 @@ class PatientProfiles extends Model {
     protected $fillable = [
         'date_of_birth',
         'gender',
-        'home_address_1',
+        'home_address',
         'home_latitude',
         'home_longitude',
         'home_address_reference',

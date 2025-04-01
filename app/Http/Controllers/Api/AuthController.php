@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -68,8 +69,7 @@ class AuthController extends Controller {
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'user_rol' => strtolower($request->user_rol),
-                'profile_photo_path' => $request->profile_photo_path,
-                'email_verified_at' => Carbon::now()
+                'profile_photo_path' => $request->profile_photo_path
             ]);
 
             // Almacenar la respuesta del controlador de perfiles
@@ -107,16 +107,12 @@ class AuthController extends Controller {
                 ]
             ], 201);
 
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-            if (isset($user)) {
-                // Eliminar el usuario creado si hubo un error al crear el perfil
-                User::destroy($user->id);
-            }
+        } catch (QueryException|Exception $e) {
             return response()->json([
-                'message' => $e->getMessage(),
+                'message' => 'Error al registrar el usuario',
                 'status' => false,
-            ], 500);
+                'error' => $e->getMessage(),
+            ], 500); // Código HTTP 500: Error interno del servidor
         }
     }
 
@@ -170,7 +166,7 @@ class AuthController extends Controller {
         $rules = [
             'date_of_birth' => 'required|date',
             'gender' => 'required|string',
-            'home_address_1' => 'required|string',
+            'home_address' => 'required|string',
             'home_latitude' => 'required',
             'home_longitude' => 'required',
             'home_address_reference' => 'nullable|string',
@@ -183,8 +179,8 @@ class AuthController extends Controller {
             'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida.',
             'gender.required' => 'El género es requerido.',
             'gender.string' => 'El género debe ser una cadena de texto.',
-            'home_address_1.required' => 'La dirección del hogar 1 es requerida.',
-            'home_address_1.string' => 'La dirección del hogar 1 debe ser una cadena de texto.',
+            'home_address.required' => 'La dirección del hogar 1 es requerida.',
+            'home_address.string' => 'La dirección del hogar 1 debe ser una cadena de texto.',
             'home_latitude.required' => 'La latitud del hogar es requerida.',
             'home_latitude.string' => 'La latitud del hogar debe ser una cadena de texto.',
             'home_longitude.required' => 'La longitud del hogar es requerida.',

@@ -18,9 +18,9 @@ return new class extends Migration {
                 ->onUpdate('cascade');
             $table->date('date_of_birth')->check('date_of_birth <= NOW()');
             $table->enum('gender', ['masculino', 'femenino']);
-            $table->string('home_address_1', 255);
-            $table->decimal('home_latitude', 10, 8);
-            $table->decimal('home_longitude', 11, 8);
+            $table->string('home_address', 255);
+            $table->decimal('home_latitude', 10, 7);
+            $table->decimal('home_longitude', 10, 7);
             $table->string('home_address_reference', 255)->nullable();
             $table->string('emergency_contact_name', 200);
             $table->string('emergency_contact_phone', 20);

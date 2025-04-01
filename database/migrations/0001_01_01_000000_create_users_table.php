@@ -13,12 +13,14 @@ return new class extends Migration {
             $table->id();
             $table->string('first_name', 100);
             $table->string('last_name' ,100);
+            $table->string('dui', 10)->unique()->nullable();
             $table->string('phone', 20)->unique()->nullable();
             $table->string('email', 100)->unique();
             $table->string('password');
             $table->enum('user_rol', ['paciente', 'profesional']);
             $table->string('profile_photo_path', 512)->nullable();
             $table->boolean('active')->default(true);
+            $table->boolean('verified')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

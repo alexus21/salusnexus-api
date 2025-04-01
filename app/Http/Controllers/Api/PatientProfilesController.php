@@ -29,7 +29,7 @@ class PatientProfilesController extends Controller {
             $patient = PatientProfiles::create([
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => strtolower($request->gender),
-                'home_address_1' => $request->home_address_1,
+                'home_address' => $request->home_address,
                 'home_latitude' => $request->home_latitude,
                 'home_longitude' => $request->home_longitude,
                 'home_address_reference' => $request->home_address_reference,
