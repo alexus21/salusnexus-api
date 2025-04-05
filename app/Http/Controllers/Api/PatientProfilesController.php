@@ -36,8 +36,8 @@ class PatientProfilesController extends Controller {
                 'home_latitude' => 13.697497222222,
                 'home_longitude' => -89.190313888889,
                 'home_address_reference' => '-',
-                'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_phone' => $emergency_contact_phone,
+                'emergency_contact_name' => '-',
+                'emergency_contact_phone' => '-',
                 'user_id' => $user_id,
             ]);
 
