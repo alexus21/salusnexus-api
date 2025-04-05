@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Rules\DUIRule;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class UserVerificationController extends Controller {
             'emergency_contact_name' => 'required|string',
             'emergency_contact_phone' => 'required|string',
             'profile_photo_path' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'dui' => 'required|string|max:10',
+            'dui' => ['required', 'string', 'unique:users,dui', new DUIRule()],
         ];
 
         $messages = [
@@ -44,8 +45,8 @@ class UserVerificationController extends Controller {
             'profile_photo_path.max' => 'La foto de perfil no debe exceder los 2MB',
             'dui.required' => 'El DUI es requerido',
             'dui.string' => 'El DUI debe ser texto',
-            'dui.max' => 'El DUI no debe exceder los 10 caracteres',
             'dui.unique' => 'El DUI ya está en uso',
+            'dui.regex' => 'El DUI no tiene un formato válido',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);

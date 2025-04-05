@@ -7,6 +7,8 @@ use App\Http\Requests\StorePatientProfilesRequest;
 use App\Http\Requests\UpdatePatientProfilesRequest;
 use App\Models\PatientProfiles;
 use App\Models\User;
+use App\Rules\EmailRule;
+use App\Rules\PhoneNumberRule;
 use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Foundation\Application;
@@ -33,8 +35,9 @@ class PatientProfilesController extends Controller {
         $rules = [
             'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
             'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
-            'phone' => 'required',                   // Teléfono obligatorio y debe ser texto
-            'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
+            'phone' => ['required', new PhoneNumberRule()],                   // Teléfono obligatorio y debe ser texto
+//            'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
+            'email' => ['required', 'email', 'unique:users,email', new EmailRule()], // Correo obligatorio, válido y único en la tabla users
             'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
             'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
             'user_rol' => 'required|in:paciente,profesional',                 // Tipo de usuario obligatorio y debe ser texto
@@ -49,6 +52,7 @@ class PatientProfilesController extends Controller {
             'last_name.required' => 'El apellido es requerido',
             'last_name.string' => 'El apellido debe ser texto',
             'phone.required' => 'El teléfono es requerido',
+            'phone.regex' => 'El teléfono no tiene un formato de número de teléfono válido',
             'email.required' => 'El correo electrónico es requerido',
             'email.email' => 'El correo electrónico debe ser válido',
             'email.unique' => 'El correo electrónico ya está en uso',
