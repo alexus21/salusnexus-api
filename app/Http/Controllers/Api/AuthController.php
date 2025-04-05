@@ -82,11 +82,14 @@ class AuthController extends Controller {
             }
 
             // Obtener el contenido JSON de la respuesta
-            $profileData = json_decode($profileResponse->getContent());
+            $profileData = json_decode($profileResponse->getContent(), true);
+            log::info($profileData);
 
             // Si hubo error en la creación del perfil, lanzar excepción
-            if (!$profileData) {
-                throw new Exception($profileData->message);
+            if (!$profileData['status']) {
+                $patient_id = $profileData['data']['id'];
+                User::destroy($patient_id);
+                throw new Exception($profileData['error']);
             }
 
             // Generar token
@@ -100,7 +103,7 @@ class AuthController extends Controller {
                 'status' => true,
                 'data' => [
                     'user' => $user,
-                    'profile' => $profileData->data, // Incluir datos del perfil
+                    'profile' => $profileData['data'], // Incluir datos del perfil
                     'access_token' => $tokenResult->accessToken,
                     'token_type' => 'Bearer',
                     'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString()
@@ -166,10 +169,6 @@ class AuthController extends Controller {
         $rules = [
             'date_of_birth' => 'required|date',
             'gender' => 'required|string',
-            'home_address' => 'required|string',
-            'home_latitude' => 'required',
-            'home_longitude' => 'required',
-            'home_address_reference' => 'nullable|string',
             'emergency_contact_name' => 'required|string',
             'emergency_contact_phone' => 'required',
         ];
@@ -179,12 +178,6 @@ class AuthController extends Controller {
             'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida.',
             'gender.required' => 'El género es requerido.',
             'gender.string' => 'El género debe ser una cadena de texto.',
-            'home_address.required' => 'La dirección del hogar 1 es requerida.',
-            'home_address.string' => 'La dirección del hogar 1 debe ser una cadena de texto.',
-            'home_latitude.required' => 'La latitud del hogar es requerida.',
-            'home_latitude.string' => 'La latitud del hogar debe ser una cadena de texto.',
-            'home_longitude.required' => 'La longitud del hogar es requerida.',
-            'home_longitude.string' => 'La longitud del hogar debe ser una cadena de texto.',
             'emergency_contact_name.required' => 'El nombre del contacto de emergencia es requerido.',
             'emergency_contact_name.string' => 'El nombre del contacto de emergencia debe ser una cadena de texto.',
             'emergency_contact_phone.required' => 'El teléfono del contacto de emergencia es requerido.',

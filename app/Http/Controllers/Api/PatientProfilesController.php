@@ -7,8 +7,11 @@ use App\Http\Requests\StorePatientProfilesRequest;
 use App\Http\Requests\UpdatePatientProfilesRequest;
 use App\Models\PatientProfiles;
 use Exception;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class PatientProfilesController extends Controller {
@@ -22,30 +25,30 @@ class PatientProfilesController extends Controller {
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request, $user_id): JsonResponse {
+    public function create(Request $request, $user_id) {
         try {
             $emergency_contact_phone = $this->formatPhoneNumber($request);
 
             $patient = PatientProfiles::create([
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => strtolower($request->gender),
-                'home_address' => $request->home_address,
-                'home_latitude' => $request->home_latitude,
-                'home_longitude' => $request->home_longitude,
-                'home_address_reference' => $request->home_address_reference,
+                'home_address' => '-',
+                'home_latitude' => 13.697497222222,
+                'home_longitude' => -89.190313888889,
+                'home_address_reference' => '-',
                 'emergency_contact_name' => $request->emergency_contact_name,
                 'emergency_contact_phone' => $emergency_contact_phone,
                 'user_id' => $user_id,
             ]);
 
-            return response()->json([
-                'message' => 'Perfil de paciente creado correctamente',
-                'status' => true,
-                'data' => $patient,
-            ], 201); // Código HTTP 201: Recurso creado
+            return response([
+                    'status' => true,
+                    'data' => $patient,
+                ], 201 // Código HTTP 201: Recurso creado
+            );
+
         } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Error al crear el perfil de paciente',
+            return response([
                 'status' => false,
                 'error' => $e->getMessage(),
             ], 500); // Código HTTP 500: Error interno del servidor
