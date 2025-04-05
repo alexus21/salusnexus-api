@@ -25,4 +25,5 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/validate', [AuthController::class, 'validateToken'])->name('auth.validateToken');
     Route::get('/userprofile', [AuthController::class, 'profile'])->name('auth.userProfile');
     Route::post('/user-verification', [UserVerificationController::class, 'verifyAccount'])->name('userVerification.verifyAccount');
+    Route::get('/is-verified', [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
 });

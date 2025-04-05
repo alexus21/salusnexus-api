@@ -159,4 +159,20 @@ class AuthController extends Controller {
             'status' => false
         ], 401);
     }
+
+    public function isUserVerified(): JsonResponse {
+        $user = Auth::user()->verified;
+
+        if ($user) {
+            return response()->json([
+                'message' => 'Ya has verificado tu cuenta',
+                'status' => true,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'No has verificado tu cuenta',
+            'status' => false
+        ], 401);
+    }
 }
