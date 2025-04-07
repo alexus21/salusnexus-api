@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->id();
             $table->string('first_name', 100);
             $table->string('last_name' ,100);
+            $table->date('date_of_birth')->check('date_of_birth <= NOW()');
+            $table->enum('gender', ['masculino', 'femenino']);
             $table->string('dui', 10)->unique()->nullable();
             $table->string('phone', 20)->unique()->nullable();
             $table->string('email', 100)->unique();

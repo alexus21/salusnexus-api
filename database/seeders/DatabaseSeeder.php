@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder {
             MedicationsCategoriesSeeder::class,
             HealthCategorySeeder::class,
             DepartmentsSeeder::class,
-            CitiesSeeder::class
+            CitiesSeeder::class,
+            SpecialitiesSeeder::class
         ]);
     }
 }

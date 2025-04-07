@@ -16,8 +16,6 @@ return new class extends Migration {
                 ->constrained('users')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->date('date_of_birth')->check('date_of_birth <= NOW()');
-            $table->enum('gender', ['masculino', 'femenino']);
             $table->string('home_address', 255);
             $table->decimal('home_latitude', 10, 7);
             $table->decimal('home_longitude', 10, 7);

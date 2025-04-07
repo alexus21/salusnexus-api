@@ -13,8 +13,6 @@ class PatientProfiles extends Model {
     use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
-        'date_of_birth',
-        'gender',
         'home_address',
         'home_latitude',
         'home_longitude',

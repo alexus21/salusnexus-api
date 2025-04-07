@@ -36,7 +36,6 @@ class PatientProfilesController extends Controller {
             'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
             'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
             'phone' => ['required', new PhoneNumberRule()],                   // Teléfono obligatorio y debe ser texto
-//            'email' => 'required|email|unique:users,email', // Correo obligatorio, válido y único en la tabla users
             'email' => ['required', 'email', 'unique:users,email', new EmailRule()], // Correo obligatorio, válido y único en la tabla users
             'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
             'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\DepartmentsController;
+use App\Http\Controllers\Api\SpecialitiesController;
 use App\Http\Controllers\Api\UserVerificationController;
 use App\Http\Middleware\NoBrowserCacheMiddleware;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 
 Route::get('/departments', [DepartmentsController::class, 'index'])->name('departments.index');
 Route::get('/cities/{department_id}', [CitiesController::class, 'getByDepartment'])->name('cities.getByDepartment');
+Route::get('/specialities', [SpecialitiesController::class, 'index'])->name('specialities.index');
 
 Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');

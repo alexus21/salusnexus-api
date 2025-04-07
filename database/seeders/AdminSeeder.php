@@ -16,6 +16,8 @@ class AdminSeeder extends Seeder {
         DB::table('users')->insert([[
             'first_name' => 'Ángel',
             'last_name' => 'Vásquez',
+            'date_of_birth' => '2003-05-03',
+            'gender' => 'masculino',
             'dui' => '12345678-9',
             'phone' => '+503 7011 6901',
             'email' => 'angelvasquez@salusnexus.admin.com',
@@ -31,6 +33,8 @@ class AdminSeeder extends Seeder {
         ],[
             'first_name' => 'Alex',
             'last_name' => 'Ulloa',
+            'date_of_birth' => '2002-12-02',
+            'gender' => 'masculino',
             'dui' => '12345678-0',
             'phone' => '+503 6454-9192',
             'email' => 'alexulloa@salusnexus.admin.com',
