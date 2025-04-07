@@ -68,22 +68,26 @@ class UserVerificationController extends Controller {
                     ->where('id', Auth::id())
                     ->value('profile_photo_path');
 
+                if (!Storage::disk('s3')->exists('images')) {
+                    Storage::disk('s3')->makeDirectory('images');
+                }
+
                 // Verificar y eliminar la imagen anterior si existe
-                if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
-                    Storage::disk('public')->delete($oldImagePath);
+                if ($oldImagePath && Storage::disk('s3')->exists($oldImagePath)) {
+                    Storage::disk('s3')->delete($oldImagePath);
                 }
 
                 // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-                $path = $request->file('profile_photo_path')->storeAs('images', $imageName, 'public');
+                $path = $request->file('profile_photo_path')->storeAs('images', $imageName, 's3');
 
                 // URL pública de la imagen (si está en storage/public)
-                $url = Storage::url($path);
+                $url = Storage::disk('s3')->url($path);
 
                 // Puedes guardar la referencia en la base de datos si es necesario
-                $manager = new ImageManager(new Driver());
+                /*$manager = new ImageManager(new Driver());
 
                 $image = $manager->read($request->file('profile_photo_path')->getRealPath());
-                $image->save(public_path('storage/images/' . $imageName));
+                $image->save(public_path('storage/images/' . $imageName));*/
 
                 // Guardar la información del usuario en la base de datos
                 if (Auth::user()->user_rol == 'paciente') {
@@ -115,6 +119,7 @@ class UserVerificationController extends Controller {
                 return response()->json([
                     'success' => true,
                     'message' => 'Perfil verificado correctamente',
+                    'url' => $url,
                 ]);
             }
 
