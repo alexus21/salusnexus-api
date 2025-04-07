@@ -7,6 +7,7 @@ use App\Http\Requests\StorePatientProfilesRequest;
 use App\Http\Requests\UpdatePatientProfilesRequest;
 use App\Models\PatientProfiles;
 use App\Models\User;
+use App\Rules\DUIRule;
 use App\Rules\EmailRule;
 use App\Rules\PhoneNumberRule;
 use Exception;
@@ -16,9 +17,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class PatientProfilesController extends Controller {
     /**
@@ -31,120 +37,8 @@ class PatientProfilesController extends Controller {
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request): JsonResponse {
-        $rules = [
-            'first_name' => 'required|string',              // Nombre obligatorio y debe ser texto
-            'last_name' => 'required|string',               // Apellido obligatorio y debe ser texto
-            'phone' => ['required', new PhoneNumberRule()],                   // Teléfono obligatorio y debe ser texto
-            'email' => ['required', 'email', 'unique:users,email', new EmailRule()], // Correo obligatorio, válido y único en la tabla users
-            'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
-            'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
-            'user_rol' => 'required|in:paciente,profesional',                 // Tipo de usuario obligatorio y debe ser texto
-            'profile_photo_path' => 'nullable|image',
-        ];
-
-        $messages = [
-            'first_name.required' => 'El nombre es requerido',
-            'first_name.string' => 'El nombre debe ser texto',
-            'last_name.required' => 'El apellido es requerido',
-            'last_name.string' => 'El apellido debe ser texto',
-            'phone.required' => 'El teléfono es requerido',
-            'phone.regex' => 'El teléfono no tiene un formato de número de teléfono válido',
-            'email.required' => 'El correo electrónico es requerido',
-            'email.email' => 'El correo electrónico debe ser válido',
-            'email.unique' => 'El correo electrónico ya está en uso',
-            'password.required' => 'La contraseña es requerida',
-            'password.string' => 'La contraseña debe ser texto',
-            'confirm_password.required' => 'La confirmación de contraseña es requerida',
-            'confirm_password.string' => 'La confirmación de contraseña debe ser texto',
-            'confirm_password.same' => 'Las contraseñas no coinciden',
-        ];
-
-        // Validación de los datos recibidos según las reglas y mensajes definidos
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        // Si la validación falla, devolver error con detalles
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error: ' . $validator->errors(),
-                'status' => false,
-                'errors' => $validator->errors() // Lista de errores específicos
-            ], 400);
-            // Código HTTP 400: Solicitud incorrecta
-        }
-
-        // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
-        $phone = str_starts_with($request->phone, "+503") ? $request->phone : "+503 " . $request->phone;
-        // Formatear el teléfono al estilo "+503 XXXX-XXXX"
-        $phone = preg_replace('/(\+503)\s?(\d{4})(\d{4})/', '$1 $2-$3', $phone);
-
-        // Verificar si el teléfono ya está registrado en la base de datos
-        $user = DB::table('users')
-            ->select('phone')
-            ->where('phone', $phone)
-            ->first();
-
-        // Si el teléfono ya existe, devolver error
-        if ($user) {
-            return response()->json([
-                'message' => 'El teléfono personal ingresado ya está en uso',
-                'status' => false,
-                'errors' => ['telefono' => ['El teléfono personal ingresado ya está en uso']]
-            ], 400); // Código HTTP 400: Solicitud incorrecta
-        }
-
-        try {
-            $user = User::create([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'phone' => $phone,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'user_rol' => strtolower($request->user_rol),
-                'profile_photo_path' => $request->profile_photo_path
-            ]);
-
-            $user_id = $user->id;
-
-            $patient = PatientProfiles::create([
-                'date_of_birth' => $request->date_of_birth,
-                'gender' => strtolower($request->gender),
-                'home_address' => '-',
-                'home_latitude' => 13.697497222222,
-                'home_longitude' => -89.190313888889,
-                'home_address_reference' => '-',
-                'emergency_contact_name' => '-',
-                'emergency_contact_phone' => '-',
-                'user_id' => $user_id,
-            ]);
-
-            // Generar token
-            $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->token;
-            $token->expires_at = Carbon::now()->addWeeks(1);
-            $token->save();
-
-            $data = [
-                'user' => $user,
-                'patient_profile' => $patient,
-                'access_token' => $tokenResult->accessToken,
-                'token_type' => 'Bearer',
-                'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
-            ];
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Usuario registrado correctamente',
-                'data' => $data,
-            ], 201); // Código HTTP 201: Creado
-
-        } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Error al registrar el usuario: ' . $e->getMessage(),
-                'errors' => ['error' => ['Error al registrar el usuario']]
-            ], 500); // Código HTTP 500: Error interno del servidor
-        }
+    public function create(Request $request) {
+        //
     }
 
     /**
@@ -180,5 +74,109 @@ class PatientProfilesController extends Controller {
      */
     public function destroy(PatientProfiles $patientProfiles) {
         //
+    }
+
+    public function verifyPatientAccount(Request $request): JsonResponse {
+        $rules = [
+            'home_address' => 'required|string',
+            'home_latitude' => 'required|numeric',
+            'home_longitude' => 'required|numeric',
+            'home_address_reference' => 'nullable|string',
+            'emergency_contact_name' => 'required|string',
+            'emergency_contact_phone' => 'required|string',
+            'profile_photo_path' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'dui' => ['required', 'string', 'unique:users,dui', new DUIRule()],
+        ];
+
+        $messages = [
+            'home_address.required' => 'La dirección de casa es requerida',
+            'home_address.string' => 'La dirección de casa debe ser texto',
+            'home_latitude.required' => 'La latitud de casa es requerida',
+            'home_latitude.numeric' => 'La latitud de casa debe ser un número',
+            'home_longitude.required' => 'La longitud de casa es requerida',
+            'home_longitude.numeric' => 'La longitud de casa debe ser un número',
+            'home_address_reference.string' => 'La referencia de la dirección de casa debe ser texto',
+            'emergency_contact_name.required' => 'El nombre del contacto de emergencia es requerido',
+            'emergency_contact_name.string' => 'El nombre del contacto de emergencia debe ser texto',
+            'emergency_contact_phone.required' => 'El teléfono del contacto de emergencia es requerido',
+            'emergency_contact_phone.string' => 'El teléfono del contacto de emergencia debe ser texto',
+            'profile_photo_path.required' => 'La foto de perfil es requerida',
+            'profile_photo_path.image' => 'La foto de perfil debe ser una imagen válida',
+            'profile_photo_path.mimes' => 'La foto de perfil debe ser un archivo de tipo jpeg, png o jpg',
+            'profile_photo_path.max' => 'La foto de perfil no debe exceder los 2MB',
+            'dui.required' => 'El DUI es requerido',
+            'dui.string' => 'El DUI debe ser texto',
+            'dui.unique' => 'El DUI ya está en uso',
+            'dui.regex' => 'El DUI no tiene un formato válido',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'error' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            if(!$request->hasFile('profile_photo_path')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La imagen de perfil es requerida'
+                ], 422);
+            }
+
+            // Generar nombre único para la imagen
+            $imageName = Str::uuid() . '.' . $request->profile_photo_path->extension();
+
+            // Obtener ruta anterior de la imagen
+            $oldImagePath = DB::table('users')
+                ->where('id', Auth::id())
+                ->value('profile_photo_path');
+
+            // Verificar y eliminar la imagen anterior si existe
+            if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
+                Storage::disk('public')->delete($oldImagePath);
+            }
+
+            // Guardar la imagen en el disco (puedes usar public, s3, etc.)
+            $path = $request->file('profile_photo_path')->storeAs('images', $imageName, 'public');
+
+            // URL pública de la imagen (si está en storage/public)
+            $url = Storage::url($path);
+
+            // Puedes guardar la referencia en la base de datos si es necesario
+            $manager = new ImageManager(new Driver());
+
+            $image = $manager->read($request->file('profile_photo_path')->getRealPath());
+            $image->save(public_path('storage/images/' . $imageName));
+
+            // Guardar la información del usuario en la base de datos
+            DB::table('patient_profiles')->where('user_id', Auth::user()->id)->update([
+                'home_address' => $request->home_address,
+                'home_latitude' => $request->home_latitude,
+                'home_longitude' => $request->home_longitude,
+                'home_address_reference' => $request->home_address_reference,
+                'emergency_contact_name' => $request->emergency_contact_name,
+                'emergency_contact_phone' => $request->emergency_contact_phone,
+            ]);
+
+            DB::table('users')->where('id', Auth::user()->id)->update([
+                'profile_photo_path' => $path,
+                'dui' => $request->dui,
+                'verified' => true,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Perfil verificado correctamente',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al subir la imagen: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
