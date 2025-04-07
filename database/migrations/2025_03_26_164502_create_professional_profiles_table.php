@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('license_number', 50)->nullable();
             $table->text('biography')->nullable();
             $table->string('clinic_name', 200)->nullable();
-            $table->string('clinic_address_1', 255)->nullable();
+            $table->string('clinic_address', 255)->nullable();
             $table->decimal('clinic_latitude', 10, 8)->nullable();
             $table->decimal('clinic_longitude', 11, 8)->nullable();
             $table->string('clinic_address_reference', 255)->nullable();

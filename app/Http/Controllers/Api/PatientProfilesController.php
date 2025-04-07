@@ -40,9 +40,7 @@ class PatientProfilesController extends Controller {
             'password' => 'required|string',                // Contraseña obligatoria y debe ser texto
             'confirm_password' => 'required|string|same:password', // Confirmación obligatoria y debe coincidir con la contraseña
             'user_rol' => 'required|in:paciente,profesional',                 // Tipo de usuario obligatorio y debe ser texto
-            'profile_photo_path' => 'nullable|image',              // Foto de perfil opcional y debe ser una imagen
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|string',
+            'profile_photo_path' => 'nullable|image',
         ];
 
         $messages = [
@@ -60,10 +58,6 @@ class PatientProfilesController extends Controller {
             'confirm_password.required' => 'La confirmación de contraseña es requerida',
             'confirm_password.string' => 'La confirmación de contraseña debe ser texto',
             'confirm_password.same' => 'Las contraseñas no coinciden',
-            'date_of_birth.required' => 'La fecha de nacimiento es requerida.',
-            'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida.',
-            'gender.required' => 'El género es requerido.',
-            'gender.string' => 'El género debe ser una cadena de texto.',
         ];
 
         // Validación de los datos recibidos según las reglas y mensajes definidos
