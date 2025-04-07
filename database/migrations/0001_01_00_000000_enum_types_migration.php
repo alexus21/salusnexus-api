@@ -15,7 +15,7 @@ return new class extends Migration {
         DB::statement("DROP TYPE IF EXISTS service_type CASCADE");
         DB::statement("DROP TYPE IF EXISTS gender CASCADE");
 
-        DB::statement("CREATE TYPE user_rol AS ENUM ('paciente', 'profesional')");
+        DB::statement("CREATE TYPE user_rol AS ENUM ('administrador', 'paciente', 'profesional')");
         DB::statement("CREATE TYPE type_subscription_plan AS
             ENUM ('paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado')");
         DB::statement("CREATE TYPE suscription_status AS
