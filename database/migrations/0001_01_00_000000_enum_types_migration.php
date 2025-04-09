@@ -28,6 +28,6 @@ return new class extends Migration {
         DB::statement("CREATE TYPE gender AS
             ENUM ('masculino', 'femenino')");
         DB::statement("CREATE TYPE payment_provider AS
-            ENUM ('VISA', 'Mastercard', 'Maestro', 'PayPal', 'Diners Club', 'American Express')");
+            ENUM ('visa', 'mastercard', 'maestro', 'paypal', 'diners', 'amex')");
     }
 };

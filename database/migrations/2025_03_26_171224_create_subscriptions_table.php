@@ -11,10 +11,6 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
             $table->enum('subscription_type',
                 ['paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado']);
             $table->enum('subscription_status',
@@ -23,8 +19,11 @@ return new class extends Migration {
             $table->timestamp('end_date')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
             $table->boolean('auto_renew')->default(false);
-            $table->enum('payment_provider_subscription_id',
-                ['VISA', 'Mastercard', 'Maestro', 'PayPal', 'Diners Club', 'American Express'])->nullable();
+            $table->foreignId('payment_card_id')
+                ->nullable()
+                ->constrained('payment_cards')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->timestamps();
         });
     }

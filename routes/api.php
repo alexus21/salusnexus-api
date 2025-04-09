@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DepartmentsController;
 use App\Http\Controllers\Api\PatientProfilesController;
 use App\Http\Controllers\Api\ProfessionalProfilesController;
 use App\Http\Controllers\Api\SpecialitiesController;
+use App\Http\Controllers\Api\SubscriptionsController;
 use App\Http\Middleware\NoBrowserCacheMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,8 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
         [AuthController::class, 'logout'])->name('auth.logout');
     Route::get('/validate',
         [AuthController::class, 'validateToken'])->name('auth.validateToken');
+    Route::post('/add-payment-method',
+        [SubscriptionsController::class, 'create'])->name('subscriptions.create');
     Route::get('/userprofile',
         [AuthController::class, 'profile'])->name('auth.userProfile');
     Route::post('/verification/patient',

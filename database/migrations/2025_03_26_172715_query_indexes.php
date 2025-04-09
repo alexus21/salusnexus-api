@@ -32,7 +32,7 @@ return new class extends Migration {
         });
 
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->index('user_id', 'idx_suscripciones_usuario_id');
+//            $table->index('user_id', 'idx_suscripciones_usuario_id');
             $table->index('subscription_status', 'idx_suscripciones_estado');
             $table->index('end_date', 'idx_suscripciones_fecha_fin');
         });
@@ -105,7 +105,7 @@ return new class extends Migration {
         });
 
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->dropIndex('idx_suscripciones_usuario_id');
+//            $table->dropIndex('idx_suscripciones_usuario_id');
             $table->dropIndex('idx_suscripciones_estado');
             $table->dropIndex('idx_suscripciones_fecha_fin');
         });
