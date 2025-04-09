@@ -15,6 +15,7 @@ class Subscriptions extends Model {
     protected $table = 'subscriptions';
 
     protected $fillable = [
+        'user_id',
         'subscription_type',
         'subscription_status',
         'start_date',

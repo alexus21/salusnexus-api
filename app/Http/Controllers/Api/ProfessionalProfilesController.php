@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProfessionalProfilesRequest;
 use App\Http\Requests\UpdateProfessionalProfilesRequest;
 use App\Models\ProfessionalProfiles;
+use App\Models\Subscriptions;
 use App\Models\User;
 use App\Rules\DUIRule;
 use Exception;
@@ -177,8 +178,15 @@ class ProfessionalProfilesController extends Controller {
                 'verified' => true,
             ]);
 
-            // Crear suscripción gratuita
-            (new SubscriptionsController())->store(Auth::user()->id, 'profesional');
+            // Check if the user already has a subscription
+            $existingSubscription = Subscriptions::where('user_id', Auth::user()->id)
+                ->where('subscription_status', 'activa')
+                ->first();
+
+            if (!$existingSubscription) {
+                // Crear suscripción gratuita
+                (new SubscriptionsController())->store(Auth::user()->id, 'profesional');
+            }
 
             return response()->json([
                 'success' => true,
