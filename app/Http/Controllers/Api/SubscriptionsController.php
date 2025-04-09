@@ -105,6 +105,7 @@ class SubscriptionsController extends Controller {
             'user_id' => $user_id,
             'subscription_type' => $subscription_type,
             'subscription_status' => 'activa',
+            'subscription_period' => $request->subscription_period,
             'start_date' => now(),
             'end_date' => now()->addDays(14),
             'trial_ends_at' => now()->addDays(14),
@@ -130,7 +131,7 @@ class SubscriptionsController extends Controller {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(int $id, string $user_rol): bool {
+    public function store(int $id, string $user_rol, $subscription_period): bool {
         // Check if the user already has a subscription
         $existingSubscription = Subscriptions::where('user_id', Auth::user()->id)
             ->where('subscription_status', 'activa')
@@ -147,6 +148,7 @@ class SubscriptionsController extends Controller {
             'user_id' => $id,
             'subscription_type' => $subscription_type,
             'subscription_status' => 'activa',
+            'subscription_period' => $subscription_period,
             'start_date' => now(),
             'end_date' => now()->addYear(),
             'trial_ends_at' => now()->addYear(),

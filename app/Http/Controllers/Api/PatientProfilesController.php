@@ -167,7 +167,7 @@ class PatientProfilesController extends Controller {
             ]);
 
             // Crear suscripción gratuita
-            (new SubscriptionsController())->store(Auth::user()->id, 'paciente');
+            (new SubscriptionsController())->store(Auth::user()->id, 'paciente', null);
 
             return response()->json([
                 'success' => true,

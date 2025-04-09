@@ -19,6 +19,7 @@ return new class extends Migration {
                 ['paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado']);
             $table->enum('subscription_status',
                 ['activa', 'cancelada', 'expirada', 'prueba', 'pago_pendiente']);
+            $table->enum('subscription_period', ['mensual', 'anual'])->nullable();
             $table->timestamp('start_date');
             $table->timestamp('end_date')->nullable();
             $table->timestamp('trial_ends_at')->nullable();

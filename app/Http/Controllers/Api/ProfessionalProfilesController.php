@@ -185,7 +185,7 @@ class ProfessionalProfilesController extends Controller {
 
             if (!$existingSubscription) {
                 // Crear suscripción gratuita
-                (new SubscriptionsController())->store(Auth::user()->id, 'profesional');
+                (new SubscriptionsController())->store(Auth::user()->id, 'profesional', $request->subscription_period);
             }
 
             return response()->json([

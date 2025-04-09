@@ -18,6 +18,7 @@ class Subscriptions extends Model {
         'user_id',
         'subscription_type',
         'subscription_status',
+        'subscription_period',
         'start_date',
         'end_date',
         'trial_ends_at',
