@@ -14,6 +14,7 @@ return new class extends Migration {
         DB::statement("DROP TYPE IF EXISTS appointment_status CASCADE");
         DB::statement("DROP TYPE IF EXISTS service_type CASCADE");
         DB::statement("DROP TYPE IF EXISTS gender CASCADE");
+        DB::statement("DROP TYPE IF EXISTS payment_provider CASCADE");
 
         DB::statement("CREATE TYPE user_rol AS ENUM ('administrador', 'paciente', 'profesional')");
         DB::statement("CREATE TYPE type_subscription_plan AS
@@ -26,5 +27,7 @@ return new class extends Migration {
             ENUM ('consultorio', 'domicilio')");
         DB::statement("CREATE TYPE gender AS
             ENUM ('masculino', 'femenino')");
+        DB::statement("CREATE TYPE payment_provider AS
+            ENUM ('VISA', 'Mastercard', 'Maestro', 'PayPal', 'Diners Club', 'American Express')");
     }
 };

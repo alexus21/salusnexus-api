@@ -15,13 +15,16 @@ return new class extends Migration {
                 ->constrained('users')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->enum('subscription_type', ['paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado']);
-            $table->enum('subscription_status', ['activa', 'cancelada', 'expirada', 'prueba', 'pago_pendiente']);
+            $table->enum('subscription_type',
+                ['paciente_gratis', 'paciente_avanzado', 'profesional_gratis', 'profesional_avanzado']);
+            $table->enum('subscription_status',
+                ['activa', 'cancelada', 'expirada', 'prueba', 'pago_pendiente']);
             $table->timestamp('start_date');
             $table->timestamp('end_date')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
             $table->boolean('auto_renew')->default(false);
-            $table->string('payment_provider_subscription_id', 255)->nullable();
+            $table->enum('payment_provider_subscription_id',
+                ['VISA', 'Mastercard', 'Maestro', 'PayPal', 'Diners Club', 'American Express'])->nullable();
             $table->timestamps();
         });
     }

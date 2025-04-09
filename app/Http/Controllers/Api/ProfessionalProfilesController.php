@@ -177,6 +177,9 @@ class ProfessionalProfilesController extends Controller {
                 'verified' => true,
             ]);
 
+            // Crear suscripción gratuita
+            (new SubscriptionsController())->store(Auth::user()->id, 'profesional');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Perfil verificado correctamente',

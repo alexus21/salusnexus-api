@@ -166,6 +166,9 @@ class PatientProfilesController extends Controller {
                 'verified' => true,
             ]);
 
+            // Crear suscripción gratuita
+            (new SubscriptionsController())->store(Auth::user()->id, 'paciente');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Perfil verificado correctamente',
