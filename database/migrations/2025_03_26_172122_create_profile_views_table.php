@@ -19,7 +19,7 @@ return new class extends Migration
                 ->onUpdate('cascade');
             $table->foreignId('visitor_user_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained('patient_profiles')
                 ->onDelete('set null')
                 ->onUpdate('cascade');
             $table->timestamp('view_datetime')

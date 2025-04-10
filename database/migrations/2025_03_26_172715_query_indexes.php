@@ -38,17 +38,12 @@ return new class extends Migration {
         });
 
         Schema::table('appointments', function (Blueprint $table) {
-            $table->index('patient_user_id', 'idx_citas_paciente_usuario_id');
-            $table->index('professional_user_id', 'idx_citas_profesional_usuario_id');
-            $table->index('professional_profile_id', 'idx_citas_perfil_profesional_id');
             $table->index('appointment_datetime', 'idx_citas_fecha_hora_cita');
             $table->index('appointment_status', 'idx_citas_estado');
         });
 
         Schema::table('reviews', function (Blueprint $table) {
             $table->index('appointment_id', 'idx_resenas_cita_id');
-            $table->index('patient_user_id', 'idx_resenas_paciente_usuario_id');
-            $table->index('professional_user_id', 'idx_resenas_profesional_usuario_id');
             $table->index('rating', 'idx_resenas_calificacion');
         });
 
@@ -111,17 +106,12 @@ return new class extends Migration {
         });
 
         Schema::table('appointments', function (Blueprint $table) {
-            $table->dropIndex('idx_citas_paciente_usuario_id');
-            $table->dropIndex('idx_citas_profesional_usuario_id');
-            $table->dropIndex('idx_citas_perfil_profesional_id');
             $table->dropIndex('idx_citas_fecha_hora_cita');
             $table->dropIndex('idx_citas_estado');
         });
 
         Schema::table('reviews', function (Blueprint $table) {
             $table->dropIndex('idx_resenas_cita_id');
-            $table->dropIndex('idx_resenas_paciente_usuario_id');
-            $table->dropIndex('idx_resenas_profesional_usuario_id');
             $table->dropIndex('idx_resenas_calificacion');
         });
 
