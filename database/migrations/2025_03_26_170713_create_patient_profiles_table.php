@@ -16,10 +16,6 @@ return new class extends Migration {
                 ->constrained('users')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->string('home_address', 255);
-            $table->decimal('home_latitude', 10, 7);
-            $table->decimal('home_longitude', 10, 7);
-            $table->string('home_address_reference', 255)->nullable();
             $table->string('emergency_contact_name', 200);
             $table->string('emergency_contact_phone', 20);
             $table->timestamps();

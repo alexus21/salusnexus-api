@@ -152,18 +152,19 @@ class PatientProfilesController extends Controller {
 
             // Guardar la información del usuario en la base de datos
             DB::table('patient_profiles')->where('user_id', Auth::user()->id)->update([
-                'home_address' => $request->home_address,
-                'home_latitude' => $request->home_latitude,
-                'home_longitude' => $request->home_longitude,
-                'home_address_reference' => $request->home_address_reference,
                 'emergency_contact_name' => $request->emergency_contact_name,
                 'emergency_contact_phone' => $request->emergency_contact_phone,
             ]);
 
             DB::table('users')->where('id', Auth::user()->id)->update([
+                'address' => $request->home_address,
+                'latitude' => $request->home_latitude,
+                'longitude' => $request->home_longitude,
+                'address_reference' => $request->home_address_reference,
                 'profile_photo_path' => $path,
                 'dui' => $request->dui,
                 'verified' => true,
+                'email_verified_at' => Carbon::now(),
             ]);
 
             // Crear suscripción gratuita

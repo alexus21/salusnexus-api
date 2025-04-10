@@ -162,10 +162,6 @@ class ProfessionalProfilesController extends Controller {
                 'license_number' => $request->license_number,
                 'biography' => $request->biography,
                 'clinic_name' => $request->clinic_name,
-                'clinic_address' => $request->clinic_address,
-                'clinic_address_reference' => $request->clinic_address_reference,
-                'clinic_latitude' => $request->clinic_latitude,
-                'clinic_longitude' => $request->clinic_longitude,
                 'home_visits' => true,
                 'years_of_experience' => $request->years_of_experience,
                 'website_url' => $request->website_url,
@@ -173,9 +169,14 @@ class ProfessionalProfilesController extends Controller {
             ]);
 
             DB::table('users')->where('id', Auth::user()->id)->update([
+                'address' => $request->clinic_address,
+                'address_reference' => $request->clinic_address_reference,
+                'latitude' => $request->clinic_latitude,
+                'longitude' => $request->clinic_longitude,
                 'profile_photo_path' => $path,
                 'dui' => $request->dui,
                 'verified' => true,
+                'email_verified_at' => Carbon::now(),
             ]);
 
             // Check if the user already has a subscription

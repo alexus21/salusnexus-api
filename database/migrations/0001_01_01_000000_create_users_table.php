@@ -17,6 +17,10 @@ return new class extends Migration {
             $table->enum('gender', ['masculino', 'femenino']);
             $table->string('dui', 10)->unique()->nullable();
             $table->string('phone', 20)->unique()->nullable();
+            $table->string('address', 255);
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
+            $table->string('address_reference', 255)->nullable();
             $table->string('email', 100)->unique();
             $table->string('password');
             $table->enum('user_rol', ['administrador', 'paciente', 'profesional']);

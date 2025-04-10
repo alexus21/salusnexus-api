@@ -99,6 +99,10 @@ class AuthController extends Controller {
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => strtolower($request->gender),
                 'phone' => $phone,
+                'address' => '-',
+                'latitude' => 13.697497222222,
+                'longitude' => -89.190313888889,
+                'address_reference' => '-',
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'user_rol' => strtolower($request->user_rol),
@@ -114,10 +118,6 @@ class AuthController extends Controller {
 
             if ($request->has('user_rol') && $request->user_rol == 'paciente') {
                 $patient = PatientProfiles::create([
-                    'home_address' => '-',
-                    'home_latitude' => 13.697497222222,
-                    'home_longitude' => -89.190313888889,
-                    'home_address_reference' => '-',
                     'emergency_contact_name' => '-',
                     'emergency_contact_phone' => '-',
                     'user_id' => $user_id,
@@ -143,10 +143,6 @@ class AuthController extends Controller {
                     'license_number' => '-',
                     'biography' => '-',
                     'clinic_name' => '-',
-                    'clinic_address' => '-',
-                    'clinic_latitude' => 13.697497222222,
-                    'clinic_longitude' => -89.190313888889,
-                    'clinic_address_reference' => '-',
                     'home_visits' => false,
                     'years_of_experience' => 1,
                     'website_url' => '-',
