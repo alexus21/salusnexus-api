@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreProfessional_SpecialitiesRequest;
-use App\Http\Requests\UpdateProfessional_SpecialitiesRequest;
-use App\Models\Professional_Specialities;
+use App\Models\ProfessionalSpecialities;
+use App\Http\Requests\StoreProfessionalSpecialitiesRequest;
+use App\Http\Requests\UpdateProfessionalSpecialitiesRequest;
 
 class ProfessionalSpecialitiesController extends Controller
 {
@@ -28,7 +27,7 @@ class ProfessionalSpecialitiesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProfessional_SpecialitiesRequest $request)
+    public function store(StoreProfessionalSpecialitiesRequest $request)
     {
         //
     }
@@ -36,7 +35,7 @@ class ProfessionalSpecialitiesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Professional_Specialities $professional_Specialities)
+    public function show(ProfessionalSpecialities $professionalSpecialities)
     {
         //
     }
@@ -44,7 +43,7 @@ class ProfessionalSpecialitiesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Professional_Specialities $professional_Specialities)
+    public function edit(ProfessionalSpecialities $professionalSpecialities)
     {
         //
     }
@@ -52,7 +51,7 @@ class ProfessionalSpecialitiesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProfessional_SpecialitiesRequest $request, Professional_Specialities $professional_Specialities)
+    public function update(UpdateProfessionalSpecialitiesRequest $request, ProfessionalSpecialities $professionalSpecialities)
     {
         //
     }
@@ -60,7 +59,7 @@ class ProfessionalSpecialitiesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Professional_Specialities $professional_Specialities)
+    public function destroy(ProfessionalSpecialities $professionalSpecialities)
     {
         //
     }

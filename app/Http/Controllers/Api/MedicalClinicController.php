@@ -7,6 +7,7 @@ use App\Http\Requests\StoreMedicalClinicRequest;
 use App\Http\Requests\UpdateMedicalClinicRequest;
 use App\Models\MedicalClinic;
 use App\Models\Medications;
+use App\Models\Professional_Specialities;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -54,6 +55,7 @@ class MedicalClinicController extends Controller {
             'waiting_room_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'office_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'speciality_type' => 'required|in:primaria,secundaria',
+            'specialities' => 'array',
         ];
 
         $messages = [
@@ -107,8 +109,11 @@ class MedicalClinicController extends Controller {
             $medicalClinic->professional_id = $professional_id;
             $medicalClinic->speciality_type = strtolower($request->speciality_type);
 
-            $user = new User();
-            $user->address = $request->address;
+            $user = User::find(Auth::id());
+            if ($user) {
+                $user->address = $request->address;
+                $user->save();
+            }
 
             /*if(!$request->hasFile('facade_photo')){
                 return response()->json([

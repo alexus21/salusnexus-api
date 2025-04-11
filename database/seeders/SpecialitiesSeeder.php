@@ -117,6 +117,10 @@ class SpecialitiesSeeder extends Seeder {
                 'description' => 'Se ocupa de la recuperación funcional de pacientes con discapacidad mediante terapias físicas y tecnológicas.',
             ],
             [
+                'name' => 'Medicina general',
+                'description' => 'Atiende problemas de salud comunes y brinda atención primaria, prevención y promoción de la salud.',
+            ],
+            [
                 'name' => 'Medicina intensiva',
                 'description' => 'Maneja pacientes en estado crítico que requieren soporte vital en unidades de cuidados intensivos (UCI).',
             ],
