@@ -9,6 +9,7 @@ use App\Models\MedicalClinic;
 use App\Models\Medications;
 use App\Models\User;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,10 +22,12 @@ class MedicalClinicController extends Controller {
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index(): JsonResponse {
         if (!Auth::check()) {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
+
+        return response()->json((new MedicalClinic())->getClinicInfo(null), 201);
     }
 
     /**
@@ -37,9 +40,7 @@ class MedicalClinicController extends Controller {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
-        log::info(Auth::user());
-
+    public function store(Request $request): JsonResponse {
         if (!Auth::check() || Auth::user()->user_rol != 'profesional' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
@@ -172,8 +173,12 @@ class MedicalClinicController extends Controller {
     /**
      * Display the specified resource.
      */
-    public function show(MedicalClinic $medicalClinic) {
-        //
+    public function show($id): JsonResponse {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Acceso no autorizado'], 401);
+        }
+
+        return response()->json((new MedicalClinic())->getClinicInfo($id), 201);
     }
 
     /**

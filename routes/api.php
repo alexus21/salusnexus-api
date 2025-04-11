@@ -17,43 +17,26 @@ Route::fallback(function () {
     ], 404);
 });
 
-Route::post('/register',
-    [AuthController::class, 'register'])->name('auth.register');
-Route::post('/login',
-    [AuthController::class, 'login'])->name('auth.login');
+Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 
-Route::get('/departments',
-    [DepartmentsController::class, 'index'])->name('departments.index');
-Route::get('/cities/{department_id}',
-    [CitiesController::class, 'getByDepartment'])->name('cities.getByDepartment');
-Route::get('/specialities',
-    [SpecialitiesController::class, 'index'])->name('specialities.index');
+Route::get('/departments', [DepartmentsController::class, 'index'])->name('departments.index');
+Route::get('/cities/{department_id}', [CitiesController::class, 'getByDepartment'])->name('cities.getByDepartment');
+Route::get('/specialities', [SpecialitiesController::class, 'index'])->name('specialities.index');
 
 Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function () {
-    Route::post('/logout',
-        [AuthController::class, 'logout'])->name('auth.logout');
-    Route::get('/validate',
-        [AuthController::class, 'validateToken'])->name('auth.validateToken');
-    Route::post('/add-payment-method',
-        [SubscriptionsController::class, 'create'])->name('subscriptions.create');
-    Route::get('/userprofile',
-        [AuthController::class, 'profile'])->name('auth.userProfile');
-    Route::post('/verification/patient',
-        [PatientProfilesController::class, 'verifyPatientAccount'])->name('patients.verifyAccount');
-    Route::post('/verification/professionals',
-        [ProfessionalProfilesController::class, 'verifyProfessionalAccount'])->name('professionals.verifyAccount');
-    Route::get('/is-verified',
-        [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::get('/validate', [AuthController::class, 'validateToken'])->name('auth.validateToken');
+    Route::post('/add-payment-method', [SubscriptionsController::class, 'create'])->name('subscriptions.create');
+    Route::get('/userprofile', [AuthController::class, 'profile'])->name('auth.userProfile');
+    Route::post('/verification/patient', [PatientProfilesController::class, 'verifyPatientAccount'])->name('patients.verifyAccount');
+    Route::post('/verification/professionals', [ProfessionalProfilesController::class, 'verifyProfessionalAccount'])->name('professionals.verifyAccount');
+    Route::get('/is-verified', [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
 
     /* Rutas asociadas al manejo de las clínicas médicas */
-    Route::get('/medical-clinics/view/all',
-        [MedicalClinicController::class, 'index'])->name('medical-clinic.index');
-    Route::get('/medical-clinics/view/{id}',
-        [MedicalClinicController::class, 'show'])->name('medical-clinic.show');
-    Route::post('/medical-clinics/add',
-        [MedicalClinicController::class, 'store'])->name('medical-clinic.store');
-    Route::patch('/medical-clinics/edit/{id}',
-        [MedicalClinicController::class, 'edit'])->name('medical-clinic.edit');
-    Route::delete('/medical-clinics/delete/{id}',
-        [MedicalClinicController::class, 'delete'])->name('medical-clinic.delete');
+    Route::get('/medical-clinics/view', [MedicalClinicController::class, 'index'])->name('medical-clinic.index');
+    Route::get('/medical-clinics/show/{id}', [MedicalClinicController::class, 'show'])->name('medical-clinic.show');
+    Route::post('/medical-clinics/add', [MedicalClinicController::class, 'store'])->name('medical-clinic.store');
+    Route::patch('/medical-clinics/edit/{id}', [MedicalClinicController::class, 'edit'])->name('medical-clinic.edit');
+    Route::delete('/medical-clinics/delete/{id}', [MedicalClinicController::class, 'delete'])->name('medical-clinic.delete');
 });

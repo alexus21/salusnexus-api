@@ -5,6 +5,8 @@ namespace App\Models;
 use Database\Factories\MedicalClinicFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\HasApiTokens;
 
 class MedicalClinic extends Model {
@@ -13,23 +15,12 @@ class MedicalClinic extends Model {
 
     protected $fillable = [
         // Requeridos
-        'professional_name',
-        'speciality_type',
-        'years_of_experience',
         'clinic_name',
-        'address', // <- Ubicacion física escrita a mano
-        'city_id',
-        'professional_id',
-        'home_visits',
-        'rating',
-
-        // Adicionales
-        'phone_number',
-        'email',
-        'website',
         'description',
-        'latitude',
-        'longitude',
+        'address',
+        'city_id',
+        'speciality_type',
+        'professional_id',
 
         // Photos
         'facade_photo',
@@ -37,9 +28,31 @@ class MedicalClinic extends Model {
         'office_photo',
     ];
 
-    public function getClinicInfo(int $clinic_id){
-        /*if ($clinic_id){
+    public function getClinicInfo($clinic_id) {
+        $query = DB::table('medical_clinics')
+            ->join('cities', 'medical_clinics.city_id', '=', 'cities.id')
+            ->join('departments', 'cities.department_id', '=', 'departments.id')
+            ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+            ->join('users', 'professional_profiles.user_id', '=', 'users.id')
+            ->select(
+                'medical_clinics.*',
+                'cities.name AS city_name',
+                'departments.name AS department_name',
+                'professional_profiles.home_visits',
+                'professional_profiles.years_of_experience',
+                'professional_profiles.website_url',
+                'users.first_name',
+                'users.last_name',
+                'users.address',
+                'users.latitude',
+                'users.longitude',
+                'users.phone',
+                'users.email'
+            )
+            ->when($clinic_id, function ($query, $clinic_id) {
+                return $query->where('medical_clinics.id', '=', $clinic_id);
+            });
 
-        }*/
+        return $clinic_id ? $query->first() : $query->get();
     }
 }
