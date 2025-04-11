@@ -76,7 +76,6 @@ class ProfessionalProfilesController extends Controller {
         $rules = [
             'license_number' => 'required|string',
             'biography' => 'required|string',
-            'clinic_name' => 'required|string',
             'clinic_address' => 'required|string',
             'clinic_address_reference' => 'nullable|string',
             'clinic_city_id' => 'required|string',
@@ -94,8 +93,6 @@ class ProfessionalProfilesController extends Controller {
             'license_number.string' => 'El número de licencia debe ser una cadena de texto.',
             'biography.required' => 'La biografía es requerida.',
             'biography.string' => 'La biografía debe ser una cadena de texto.',
-            'clinic_name.required' => 'El nombre de la clínica es requerido.',
-            'clinic_name.string' => 'El nombre de la clínica debe ser una cadena de texto.',
             'clinic_address_1.required' => 'La dirección de la clínica 1 es requerida.',
             'clinic_address_1.string' => 'La dirección de la clínica 1 debe ser una cadena de texto.',
             'clinic_latitude.required' => 'La latitud de la clínica es requerida.',
@@ -161,7 +158,6 @@ class ProfessionalProfilesController extends Controller {
             DB::table('professional_profiles')->where('user_id', Auth::user()->id)->update([
                 'license_number' => $request->license_number,
                 'biography' => $request->biography,
-                'clinic_name' => $request->clinic_name,
                 'home_visits' => true,
                 'years_of_experience' => $request->years_of_experience,
                 'website_url' => $request->website_url,

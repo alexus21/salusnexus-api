@@ -142,7 +142,6 @@ class AuthController extends Controller {
                 $professional = ProfessionalProfiles::create([
                     'license_number' => '-',
                     'biography' => '-',
-                    'clinic_name' => '-',
                     'home_visits' => false,
                     'years_of_experience' => 1,
                     'website_url' => '-',

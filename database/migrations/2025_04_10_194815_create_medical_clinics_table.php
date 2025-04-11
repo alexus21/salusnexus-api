@@ -11,13 +11,15 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('medical_clinics', function (Blueprint $table) {
             $table->id();
-            $table->string('facade_photo', 512)->nullable();
-            $table->string('waiting_room_photo', 512)->nullable();
-            $table->string('office_photo', 512)->nullable();
+            $table->string('clinic_name', 200);
+            $table->string('description', 512);
             $table->foreignId('city_id')
                 ->constrained('cities')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
+            $table->string('facade_photo', 512);
+            $table->string('waiting_room_photo', 512)->nullable();
+            $table->string('office_photo', 512)->nullable();
             $table->foreignId('professional_id')
                 ->constrained('professional_profiles')
                 ->cascadeOnDelete()

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\DepartmentsController;
+use App\Http\Controllers\Api\MedicalClinicController;
 use App\Http\Controllers\Api\PatientProfilesController;
 use App\Http\Controllers\Api\ProfessionalProfilesController;
 use App\Http\Controllers\Api\SpecialitiesController;
@@ -43,4 +44,16 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
         [ProfessionalProfilesController::class, 'verifyProfessionalAccount'])->name('professionals.verifyAccount');
     Route::get('/is-verified',
         [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
+
+    /* Rutas asociadas al manejo de las clínicas médicas */
+    Route::get('/medical-clinics/view/all',
+        [MedicalClinicController::class, 'index'])->name('medical-clinic.index');
+    Route::get('/medical-clinics/view/{id}',
+        [MedicalClinicController::class, 'show'])->name('medical-clinic.show');
+    Route::post('/medical-clinics/add',
+        [MedicalClinicController::class, 'store'])->name('medical-clinic.store');
+    Route::patch('/medical-clinics/edit/{id}',
+        [MedicalClinicController::class, 'edit'])->name('medical-clinic.edit');
+    Route::delete('/medical-clinics/delete/{id}',
+        [MedicalClinicController::class, 'delete'])->name('medical-clinic.delete');
 });
