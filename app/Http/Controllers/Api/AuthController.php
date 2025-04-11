@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller {
@@ -287,7 +288,7 @@ class AuthController extends Controller {
         ], 401);
     }
 
-    public function profile(Request $request): JsonResponse {
+    public function profile(): JsonResponse {
         $user = (new User)->getUserInfoByItsId(Auth::user()->id);
 
         if ($user) {
