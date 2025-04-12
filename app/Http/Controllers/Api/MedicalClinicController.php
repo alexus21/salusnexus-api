@@ -50,6 +50,9 @@ class MedicalClinicController extends Controller {
             'clinic_name' => 'required|string|max:200',
             'description' => 'string|max:512',
             'address' => 'required|string|max:512',
+            'address_reference' => 'string|max:512',
+            'latitude' => 'numeric',
+            'longitude' => 'numeric',
             'city_id' => 'required|exists:cities,id',
 //            'facade_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'waiting_room_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -104,6 +107,10 @@ class MedicalClinicController extends Controller {
 
             $medicalClinic = new MedicalClinic();
             $medicalClinic->clinic_name = $request->clinic_name;
+            $medicalClinic->address = $request->address;
+            $medicalClinic->address_reference = $request->address_reference;
+            $medicalClinic->latitude = $request->latitude;
+            $medicalClinic->longitude = $request->longitude;
             $medicalClinic->description = $request->description;
             $medicalClinic->city_id = $request->city_id;
             $medicalClinic->professional_id = $professional_id;
