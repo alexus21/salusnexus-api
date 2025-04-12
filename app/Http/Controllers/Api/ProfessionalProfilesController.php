@@ -128,7 +128,6 @@ class ProfessionalProfilesController extends Controller {
             'home_longitude.string' => 'La longitud de casa debe ser una cadena de texto.',
             'home_address_reference.string' => 'La referencia de la dirección de casa debe ser una cadena de texto.',
 
-
             'biography.required' => 'La biografía es requerida.',
             'biography.string' => 'La biografía debe ser una cadena de texto.',
             'years_of_experience.required' => 'Los años de experiencia son requeridos.',
