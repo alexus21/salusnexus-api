@@ -156,7 +156,7 @@ class ProfessionalProfilesController extends Controller {
         try {
             // URL pública de la imagen (si está en storage/public)
             $pfp_path = $this->saveProfilePhoto($request);
-            $licence_path = $this->saveLicencePhoto($request);
+            $license_path = $this->saveLicensePhoto($request);
 
             // Guardar la información del usuario en la base de datos
             DB::table('professional_profiles')->where('user_id', Auth::user()->id)->update([
@@ -179,7 +179,7 @@ class ProfessionalProfilesController extends Controller {
                 'licensing_authority' => $request->license_authority,
                 'issue_date' => $request->issue_date,
                 'expiration_date' => $request->expiration_date,
-                'license_image_path' => $licence_path,
+                'license_image_path' => $license_path,
             ]);
 
             $medicalLicense->save();
@@ -254,7 +254,7 @@ class ProfessionalProfilesController extends Controller {
         return $path;
     }
 
-    private function saveLicencePhoto(Request $request): JsonResponse|string {
+    private function saveLicensePhoto(Request $request): JsonResponse|string {
         if(!$request->hasFile('license_image_path')){
             return response()->json([
                 'success' => false,
