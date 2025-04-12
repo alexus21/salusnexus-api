@@ -170,8 +170,11 @@ class PatientProfilesController extends Controller {
             // Crear suscripción gratuita
             (new SubscriptionsController())->store(Auth::user()->id, 'paciente', null);
 
+            $user = ((new User())->getUserInfoByItsId(Auth::user()->id));
+
             return response()->json([
                 'success' => true,
+                'user' => $user,
                 'message' => 'Perfil verificado correctamente',
             ]);
         } catch (Exception $e) {

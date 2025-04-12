@@ -185,8 +185,11 @@ class ProfessionalProfilesController extends Controller {
                 (new SubscriptionsController())->store(Auth::user()->id, 'profesional', $request->subscription_period);
             }
 
+            $user = ((new User())->getUserInfoByItsId(Auth::user()->id));
+
             return response()->json([
                 'success' => true,
+                'user' => $user,
                 'message' => 'Perfil verificado correctamente',
             ]);
         } catch (Exception $e) {
