@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\ProfessionalProfilesFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
 class ProfessionalProfiles extends Model {
-    /** @use HasFactory<\Database\Factories\ProfessionalProfilesFactory> */
+    /** @use HasFactory<ProfessionalProfilesFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
-        'license_number',
         'biography',
         'clinic_name',
         'home_visits',

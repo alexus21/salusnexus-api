@@ -49,8 +49,8 @@ class MedicalClinicController extends Controller {
         $rules = [
             'clinic_name' => 'required|string|max:200',
             'description' => 'string|max:512',
-            'address' => 'required|string|max:512',
-            'address_reference' => 'string|max:512',
+            'clinic_address' => 'required|string|max:512',
+            'clinic_address_reference' => 'string|max:512',
             'clinic_latitude' => 'numeric',
             'clinic_longitude' => 'numeric',
             'city_id' => 'required|exists:cities,id',
@@ -58,7 +58,6 @@ class MedicalClinicController extends Controller {
             'waiting_room_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'office_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'speciality_type' => 'required|in:primaria,secundaria',
-            'specialities' => 'array',
         ];
 
         $messages = [

@@ -14,7 +14,6 @@ return new class extends Migration {
         Schema::create('professional_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('license_number', 50)->nullable();
             $table->text('biography')->nullable();
             $table->boolean('home_visits')->default(false);
             $table->integer('years_of_experience')->nullable();

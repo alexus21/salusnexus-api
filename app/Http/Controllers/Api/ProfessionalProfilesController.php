@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProfessionalProfilesRequest;
 use App\Http\Requests\UpdateProfessionalProfilesRequest;
+use App\Models\MedicalClinic;
 use App\Models\MedicalLicenses;
 use App\Models\ProfessionalProfiles;
 use App\Models\Subscriptions;
@@ -75,6 +76,8 @@ class ProfessionalProfilesController extends Controller {
     }
 
     public function verifyProfessionalAccount(Request $request): JsonResponse {
+        log::info($request);
+
         $rules = [
             // Datos para la licencia
             'license_number' => 'required|string',
@@ -95,11 +98,17 @@ class ProfessionalProfilesController extends Controller {
             // Datos del perfil profesional
             'biography' => 'required|string',
             'years_of_experience' => 'required|integer',
+            'clinic_name' => 'required|string|max:200',
+            'description' => 'string|max:512',
             'clinic_address' => 'required|string',
             'clinic_address_reference' => 'nullable|string',
             'city_id' => 'required',
             'clinic_latitude' => 'required',
             'clinic_longitude' => 'required',
+            'facade_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'waiting_room_photo' => 'image|mimes:jpeg,png,jpg|max:2048',
+            'office_photo' => 'image|mimes:jpeg,png,jpg|max:2048',
+            'speciality_type' => 'required|in:primaria,secundaria',
             'website_url' => 'nullable|string',
         ];
 
@@ -151,7 +160,31 @@ class ProfessionalProfilesController extends Controller {
             'clinic_longitude.string' => 'La longitud de la clínica debe ser una cadena de texto.',
             'city_id.required' => 'La ciudad es requerida.',
             'city_id.exists' => 'La ciudad seleccionada no es válida.',
+
+            'facade_photo.required' => 'La foto de la fachada es requerida.',
+            'facade_photo.image' => 'La foto de la fachada debe ser una imagen válida.',
+            'facade_photo.mimes' => 'La foto de la fachada debe ser un archivo de tipo jpeg, png o jpg.',
+            'facade_photo.max' => 'La foto de la fachada no debe exceder los 2MB.',
+            'speciality_type.required' => 'El tipo de especialidad es requerido.',
+            'speciality_type.in' => 'El tipo de especialidad debe ser primaria o secundaria.',
+            'clinic_name.required' => 'El nombre de la clínica es requerido.',
+            'clinic_name.string' => 'El nombre de la clínica debe ser una cadena de texto.',
+            'clinic_name.max' => 'El nombre de la clínica no debe exceder los 200 caracteres.',
+            'description.string' => 'La descripción debe ser una cadena de texto.',
+            'description.max' => 'La descripción no debe exceder los 512 caracteres.',
         ];
+
+        if ($request->has('waiting_room_photo')) {
+            $rules['waiting_room_photo'] = 'image|mimes:jpeg,png,jpg,gif|max:2048';
+            $messages['waiting_room_photo.image'] = 'La foto de la sala de espera debe ser una imagen.';
+            $messages['waiting_room_photo.mimes'] = 'La foto de la sala de espera debe ser un archivo de tipo: jpeg, png, jpg, gif.';
+        }
+
+        if ($request->has('office_photo')) {
+            $rules['office_photo'] = 'image|mimes:jpeg,png,jpg,gif|max:2048';
+            $messages['office_photo.image'] = 'La foto de la oficina debe ser una imagen.';
+            $messages['office_photo.mimes'] = 'La foto de la oficina debe ser un archivo de tipo: jpeg, png, jpg, gif.';
+        }
 
         $validator = Validator::make($request->all(), $rules, $messages);
 
@@ -169,7 +202,6 @@ class ProfessionalProfilesController extends Controller {
 
             // Guardar la información del usuario en la base de datos
             DB::table('professional_profiles')->where('user_id', Auth::user()->id)->update([
-                'license_number' => $request->license_number,
                 'biography' => $request->biography,
                 'home_visits' => true,
                 'years_of_experience' => $request->years_of_experience,
@@ -194,6 +226,36 @@ class ProfessionalProfilesController extends Controller {
             ]);
 
             $medicalLicense->save();
+
+            $medicalClinic = new MedicalClinic();
+            $medicalClinic = $medicalClinic->create([
+                'clinic_name' => $request->clinic_name,
+                'address' => $request->clinic_address,
+                'address_reference' => $request->clinic_address_reference,
+                'clinic_latitude' => $request->clinic_latitude,
+                'clinic_longitude' => $request->clinic_longitude,
+                'description' => $request->description,
+                'city_id' => $request->city_id,
+                'professional_id' => $professional_id,
+                'speciality_type' => strtolower($request->speciality_type),
+                'facade_photo' => $this->saveFacadePhoto($request),
+                'waiting_room_photo' => '-',
+                'office_photo' => '-',
+            ]);
+
+            if ($request->hasFile('waiting_room_photo')) {
+                $waitingRoomImageName = Str::uuid() . '.' . $request->waiting_room_photo->extension();
+                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images', $waitingRoomImageName, 's3');
+                $medicalClinic->waiting_room_photo = Storage::disk('s3')->url($waitingRoomPath);
+            }
+
+            if ($request->hasFile('office_photo')) {
+                $officeImageName = Str::uuid() . '.' . $request->office_photo->extension();
+                $officePath = $request->file('office_photo')->storeAs('images', $officeImageName, 's3');
+                $medicalClinic->office_photo = Storage::disk('s3')->url($officePath);
+            }
+
+            $medicalClinic->save();
 
             DB::table('users')->where('id', Auth::user()->id)->update([
                 'address' => $request->home_address,
@@ -299,5 +361,39 @@ class ProfessionalProfilesController extends Controller {
         Storage::disk('s3')->url($path);
 
         return $path;
+    }
+
+    private function saveFacadePhoto(Request $request) {
+        if(!$request->hasFile('facade_photo')){
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró ninguna imagen'
+            ], 400);
+        }
+
+        // Generar nombre único para la imagen
+        $imageName = Str::uuid() . '.' . $request->facade_photo->extension();
+
+        // Obtener ruta anterior de la imagen
+        $oldImagePath = DB::table('medical_clinics')
+            ->where('id', Auth::id())
+            ->value('facade_photo');
+
+        if (!Storage::disk('s3')->exists('images')) {
+            Storage::disk('s3')->makeDirectory('images');
+        }
+
+        // Verificar y eliminar la imagen anterior si existe
+        if ($oldImagePath && Storage::disk('s3')->exists($oldImagePath)) {
+            Storage::disk('s3')->delete($oldImagePath);
+        }
+
+        // Guardar la imagen en el disco (puedes usar public, s3, etc.)
+        $path = $request->file('facade_photo')->storeAs('images', $imageName, 's3');
+
+        // URL pública de la imagen (si está en storage/public)
+        $url = Storage::disk('s3')->url($path);
+
+        return $url;
     }
 }
