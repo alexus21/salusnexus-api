@@ -137,8 +137,8 @@ class MedicalClinicController extends Controller {
                 ->where('id', Auth::id())
                 ->value('facade_photo');
 
-            if (!Storage::disk('s3')->exists('images/clinics')) {
-                Storage::disk('s3')->makeDirectory('images/clinics');
+            if (!Storage::disk('s3')->exists('images')) {
+                Storage::disk('s3')->makeDirectory('images');
             }
 
             // Verificar y eliminar la imagen anterior si existe
@@ -147,7 +147,7 @@ class MedicalClinicController extends Controller {
             }
 
             // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-            $path = $request->file('facade_photo')->storeAs('images/clinics', $imageName, 's3');
+            $path = $request->file('facade_photo')->storeAs('images', $imageName, 's3');
 
             // URL pública de la imagen (si está en storage/public)
             $url = Storage::disk('s3')->url($path);
@@ -157,13 +157,13 @@ class MedicalClinicController extends Controller {
 
             if($request->hasFile('waiting_room_photo')){
                 $waitingRoomImageName = Str::uuid() . '.' . $request->waiting_room_photo->extension();
-                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images/clinics', $waitingRoomImageName, 's3');
+                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images', $waitingRoomImageName, 's3');
                 $medicalClinic->waiting_room_photo = Storage::disk('s3')->url($waitingRoomPath);
             }
 
             if($request->hasFile('office_photo')){
                 $officeImageName = Str::uuid() . '.' . $request->office_photo->extension();
-                $officePath = $request->file('office_photo')->storeAs('images/clinics', $officeImageName, 's3');
+                $officePath = $request->file('office_photo')->storeAs('images', $officeImageName, 's3');
                 $medicalClinic->office_photo = Storage::disk('s3')->url($officePath);
             }
 

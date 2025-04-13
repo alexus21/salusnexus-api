@@ -75,8 +75,6 @@ class ProfessionalProfilesController extends Controller {
     }
 
     public function verifyProfessionalAccount(Request $request): JsonResponse {
-        log::info($request);
-
         $rules = [
             // Datos para la licencia
             'license_number' => 'required|string',
@@ -183,9 +181,11 @@ class ProfessionalProfilesController extends Controller {
                 ->where('user_id', Auth::user()->id)
                 ->value('id');
 
+            log::info($professional_id);
+
             $medicalLicense = new MedicalLicenses();
             $medicalLicense = $medicalLicense->create([
-                'professional_speciality_id' => $professional_id,
+                'professional_profile_id' => $professional_id,
                 'license_number' => $request->license_number,
                 'licensing_authority' => $request->license_authority,
                 'issue_date' => $request->issue_date,
@@ -196,10 +196,10 @@ class ProfessionalProfilesController extends Controller {
             $medicalLicense->save();
 
             DB::table('users')->where('id', Auth::user()->id)->update([
-                'address' => $request->clinic_address,
-                'address_reference' => $request->clinic_address_reference,
-                'latitude' => $request->clinic_latitude,
-                'longitude' => $request->clinic_longitude,
+                'address' => $request->home_address,
+                'address_reference' => $request->home_address_reference,
+                'latitude' => $request->home_latitude,
+                'longitude' => $request->home_longitude,
                 'profile_photo_path' => $pfp_path,
                 'dui' => $request->dui,
                 'verified' => true,
@@ -216,17 +216,19 @@ class ProfessionalProfilesController extends Controller {
                 (new SubscriptionsController())->store(Auth::user()->id, 'profesional', $request->subscription_period);
             }
 
+            (new MedicalClinicController())->store($request);
+
             $user = ((new User())->getUserInfoByItsId(Auth::user()->id));
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'user' => $user,
                 'message' => 'Perfil verificado correctamente',
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Error al subir la imagen: ' . $e->getMessage()
+                'status' => false,
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -247,8 +249,8 @@ class ProfessionalProfilesController extends Controller {
             ->where('id', Auth::id())
             ->value('profile_photo_path');
 
-        if (!Storage::disk('s3')->exists('images/profiles')) {
-            Storage::disk('s3')->makeDirectory('images/profiles');
+        if (!Storage::disk('s3')->exists('images')) {
+            Storage::disk('s3')->makeDirectory('images');
         }
 
         // Verificar y eliminar la imagen anterior si existe
@@ -257,7 +259,7 @@ class ProfessionalProfilesController extends Controller {
         }
 
         // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-        $path = $request->file('profile_photo_path')->storeAs('images/profiles', $imageName, 's3');
+        $path = $request->file('profile_photo_path')->storeAs('images', $imageName, 's3');
 
         // URL pública de la imagen (si está en storage/public)
         Storage::disk('s3')->url($path);
@@ -277,21 +279,21 @@ class ProfessionalProfilesController extends Controller {
         $imageName = Str::uuid() . '.' . $request->license_image_path->extension();
 
         // Obtener ruta anterior de la imagen
-        $oldImagePath = DB::table('users')
+        /*$oldImagePath = DB::table('medical_licenses')
             ->where('id', Auth::id())
-            ->value('license_image_path');
+            ->value('license_image_path');*/
 
-        if (!Storage::disk('s3')->exists('images/licences')) {
-            Storage::disk('s3')->makeDirectory('images/licences');
+        if (!Storage::disk('s3')->exists('images')) {
+            Storage::disk('s3')->makeDirectory('images');
         }
 
         // Verificar y eliminar la imagen anterior si existe
-        if ($oldImagePath && Storage::disk('s3')->exists($oldImagePath)) {
+        /*if ($oldImagePath && Storage::disk('s3')->exists($oldImagePath)) {
             Storage::disk('s3')->delete($oldImagePath);
-        }
+        }*/
 
         // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-        $path = $request->file('license_image_path')->storeAs('images/licences', $imageName, 's3');
+        $path = $request->file('license_image_path')->storeAs('images', $imageName, 's3');
 
         // URL pública de la imagen (si está en storage/public)
         Storage::disk('s3')->url($path);
