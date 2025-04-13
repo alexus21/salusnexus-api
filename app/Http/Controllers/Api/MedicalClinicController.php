@@ -51,10 +51,10 @@ class MedicalClinicController extends Controller {
             'description' => 'string|max:512',
             'address' => 'required|string|max:512',
             'address_reference' => 'string|max:512',
-            'latitude' => 'numeric',
-            'longitude' => 'numeric',
+            'clinic_latitude' => 'numeric',
+            'clinic_longitude' => 'numeric',
             'city_id' => 'required|exists:cities,id',
-//            'facade_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'facade_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'waiting_room_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'office_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'speciality_type' => 'required|in:primaria,secundaria',
@@ -71,10 +71,10 @@ class MedicalClinicController extends Controller {
             'address.string' => 'La dirección debe ser una cadena de texto.',
             'address.max' => 'La dirección no debe exceder los 512 caracteres.',
             'city_id.required' => 'La ciudad es obligatoria.',
-            /*'facade_photo.required' => 'La foto de la fachada es obligatoria.',
+            'facade_photo.required' => 'La foto de la fachada es obligatoria.',
             'facade_photo.image' => 'La foto de la fachada debe ser una imagen.',
             'facade_photo.mimes' => 'La foto de la fachada debe ser un archivo de tipo: jpeg, png, jpg, gif.',
-            'facade_photo.max' => 'La foto de la fachada no debe exceder los 2MB.',*/
+            'facade_photo.max' => 'La foto de la fachada no debe exceder los 2MB.',
             'speciality_type.required' => 'El tipo de especialidad es obligatorio.',
         ];
 
@@ -109,8 +109,8 @@ class MedicalClinicController extends Controller {
             $medicalClinic->clinic_name = $request->clinic_name;
             $medicalClinic->address = $request->address;
             $medicalClinic->address_reference = $request->address_reference;
-            $medicalClinic->latitude = $request->latitude;
-            $medicalClinic->longitude = $request->longitude;
+            $medicalClinic->clinic_latitude = $request->clinic_latitude;
+            $medicalClinic->clinic_longitude = $request->clinic_longitude;
             $medicalClinic->description = $request->description;
             $medicalClinic->city_id = $request->city_id;
             $medicalClinic->professional_id = $professional_id;
@@ -122,7 +122,7 @@ class MedicalClinicController extends Controller {
                 $user->save();
             }
 
-            /*if(!$request->hasFile('facade_photo')){
+            if(!$request->hasFile('facade_photo')){
                 return response()->json([
                     'success' => false,
                     'message' => 'No se encontró ninguna imagen'
@@ -150,7 +150,7 @@ class MedicalClinicController extends Controller {
             $path = $request->file('facade_photo')->storeAs('images/clinics', $imageName, 's3');
 
             // URL pública de la imagen (si está en storage/public)
-            $url = Storage::disk('s3')->url($path);*/
+            $url = Storage::disk('s3')->url($path);
 
             // Guardar la información de la clinica en la base de datos
             $medicalClinic->facade_photo = '-';

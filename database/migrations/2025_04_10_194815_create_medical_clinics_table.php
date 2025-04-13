@@ -14,8 +14,8 @@ return new class extends Migration {
             $table->string('clinic_name', 200);
             $table->string('address', 512);
             $table->string('address_reference', 512)->nullable();
-            $table->string('latitude', 20)->nullable();
-            $table->string('longitude', 20)->nullable();
+            $table->string('clinic_latitude', 20)->nullable();
+            $table->string('clinic_longitude', 20)->nullable();
             $table->string('description', 512);
             $table->foreignId('city_id')
                 ->constrained('cities')

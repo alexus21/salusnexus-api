@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -74,6 +75,8 @@ class ProfessionalProfilesController extends Controller {
     }
 
     public function verifyProfessionalAccount(Request $request): JsonResponse {
+        log::info($request);
+
         $rules = [
             // Datos para la licencia
             'license_number' => 'required|string',
@@ -85,8 +88,8 @@ class ProfessionalProfilesController extends Controller {
 
             // Datos del usuario
             'home_address' => 'required|string',
-            'home_latitude' => 'required|string',
-            'home_longitude' => 'required|string',
+            'home_latitude' => 'required',
+            'home_longitude' => 'required',
             'home_address_reference' => 'nullable|string', // <- Por si lo busca la policía (?
             'profile_photo_path' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'dui' => ['required', 'string', 'unique:users,dui', new DUIRule()],
@@ -94,13 +97,12 @@ class ProfessionalProfilesController extends Controller {
             // Datos del perfil profesional
             'biography' => 'required|string',
             'years_of_experience' => 'required|integer',
-            /*'clinic_address' => 'required|string',
+            'clinic_address' => 'required|string',
             'clinic_address_reference' => 'nullable|string',
-            'clinic_city_id' => 'required|string',
-            'clinic_latitude' => 'required|string',
-            'clinic_longitude' => 'required|string',
-            'home_visits' => 'required|boolean',
-            'website_url' => 'nullable|string',*/
+            'city_id' => 'required',
+            'clinic_latitude' => 'required',
+            'clinic_longitude' => 'required',
+            'website_url' => 'nullable|string',
         ];
 
         $messages = [
@@ -141,6 +143,16 @@ class ProfessionalProfilesController extends Controller {
             'dui.string' => 'El DUI debe ser texto',
             'dui.unique' => 'El DUI ya está en uso',
             'dui.regex' => 'El DUI no tiene un formato válido',
+
+            'clinic_address.required' => 'La dirección de la clínica es requerida.',
+            'clinic_address.string' => 'La dirección de la clínica debe ser una cadena de texto.',
+            'clinic_address_reference.string' => 'La referencia de la dirección de la clínica debe ser una cadena de texto.',
+            'clinic_latitude.required' => 'La latitud de la clínica es requerida.',
+            'clinic_latitude.string' => 'La latitud de la clínica debe ser una cadena de texto.',
+            'clinic_longitude.required' => 'La longitud de la clínica es requerida.',
+            'clinic_longitude.string' => 'La longitud de la clínica debe ser una cadena de texto.',
+            'city_id.required' => 'La ciudad es requerida.',
+            'city_id.exists' => 'La ciudad seleccionada no es válida.',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
