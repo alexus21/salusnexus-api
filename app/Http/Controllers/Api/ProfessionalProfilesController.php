@@ -245,14 +245,16 @@ class ProfessionalProfilesController extends Controller {
 
             if ($request->hasFile('waiting_room_photo')) {
                 $waitingRoomImageName = Str::uuid() . '.' . $request->waiting_room_photo->extension();
-                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images', $waitingRoomImageName, 's3');
-                $medicalClinic->waiting_room_photo = Storage::disk('s3')->url($waitingRoomPath);
+                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images/clinics_pics', $waitingRoomImageName, 's3');
+                Storage::disk('s3')->url($waitingRoomPath);
+                $medicalClinic->waiting_room_photo = $waitingRoomPath;
             }
 
             if ($request->hasFile('office_photo')) {
                 $officeImageName = Str::uuid() . '.' . $request->office_photo->extension();
-                $officePath = $request->file('office_photo')->storeAs('images', $officeImageName, 's3');
-                $medicalClinic->office_photo = Storage::disk('s3')->url($officePath);
+                $officePath = $request->file('office_photo')->storeAs('images/clinics_pics', $officeImageName, 's3');
+                Storage::disk('s3')->url($officePath);
+                $medicalClinic->office_photo = $officePath;
             }
 
             $medicalClinic->save();
@@ -312,7 +314,7 @@ class ProfessionalProfilesController extends Controller {
             ->value('profile_photo_path');
 
         if (!Storage::disk('s3')->exists('images')) {
-            Storage::disk('s3')->makeDirectory('images');
+            Storage::disk('s3')->makeDirectory('images/profile_pics');
         }
 
         // Verificar y eliminar la imagen anterior si existe
@@ -321,7 +323,7 @@ class ProfessionalProfilesController extends Controller {
         }
 
         // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-        $path = $request->file('profile_photo_path')->storeAs('images', $imageName, 's3');
+        $path = $request->file('profile_photo_path')->storeAs('images/profile_pics', $imageName, 's3');
 
         // URL pública de la imagen (si está en storage/public)
         Storage::disk('s3')->url($path);
@@ -346,7 +348,7 @@ class ProfessionalProfilesController extends Controller {
             ->value('license_image_path');*/
 
         if (!Storage::disk('s3')->exists('images')) {
-            Storage::disk('s3')->makeDirectory('images');
+            Storage::disk('s3')->makeDirectory('images/medical_licenses_pics');
         }
 
         // Verificar y eliminar la imagen anterior si existe
@@ -355,7 +357,7 @@ class ProfessionalProfilesController extends Controller {
         }*/
 
         // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-        $path = $request->file('license_image_path')->storeAs('images', $imageName, 's3');
+        $path = $request->file('license_image_path')->storeAs('images/medical_licenses_pics', $imageName, 's3');
 
         // URL pública de la imagen (si está en storage/public)
         Storage::disk('s3')->url($path);
@@ -380,7 +382,7 @@ class ProfessionalProfilesController extends Controller {
             ->value('facade_photo');
 
         if (!Storage::disk('s3')->exists('images')) {
-            Storage::disk('s3')->makeDirectory('images');
+            Storage::disk('s3')->makeDirectory('images/clinics_pics');
         }
 
         // Verificar y eliminar la imagen anterior si existe
@@ -389,11 +391,11 @@ class ProfessionalProfilesController extends Controller {
         }
 
         // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-        $path = $request->file('facade_photo')->storeAs('images', $imageName, 's3');
+        $path = $request->file('facade_photo')->storeAs('images/clinics_pics', $imageName, 's3');
 
         // URL pública de la imagen (si está en storage/public)
-        $url = Storage::disk('s3')->url($path);
+        Storage::disk('s3')->url($path);
 
-        return $url;
+        return $path;
     }
 }
