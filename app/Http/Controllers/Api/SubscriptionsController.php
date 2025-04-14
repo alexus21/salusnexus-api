@@ -27,7 +27,7 @@ class SubscriptionsController extends Controller {
     public function create(Request $request): JsonResponse {
         log::info($request);
 
-        if(!Auth::check()){
+        if (!Auth::check()) {
             return response()->json([
                 'message' => 'No autorizado',
             ], 401);
@@ -51,7 +51,7 @@ class SubscriptionsController extends Controller {
 
         $validation = Validator::make($request->all(), $rules, $messages);
 
-        if ($validation->fails()){
+        if ($validation->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Ocurrió un error al validar los datos.',
@@ -78,7 +78,7 @@ class SubscriptionsController extends Controller {
 
         $validation = Validator::make($request->all(), $rules, $messages);
 
-        if ($validation->fails()){
+        if ($validation->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Ocurrió un error al validar los datos.',
@@ -164,6 +164,27 @@ class SubscriptionsController extends Controller {
      */
     public function show(Subscriptions $subscriptions) {
         //
+    }
+
+    public function mySubscription(): JsonResponse {
+        $user_id = Auth::user()->id;
+
+        $subscription = Subscriptions::where('user_id', $user_id)
+            ->where('subscription_status', 'activa')
+            ->first();
+
+        if ($subscription) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Ya posees una suscripción activa.',
+                'subscription' => $subscription,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'No tienes una suscripción activa. ¿Deseas agregar una?',
+            ], 404);
+        }
     }
 
     /**
