@@ -245,12 +245,10 @@ class AuthController extends Controller {
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
             'status' => true,
-            'data' => [
-                'user' => $user, // Información del usuario autenticado
-                'access_token' => $tokenResult->accessToken, // Token de acceso
-                'token_type' => 'Bearer', // Tipo de token
-                'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString() // Fecha de expiración
-            ]
+            'user' => $user, // Información del usuario autenticado
+            'access_token' => $tokenResult->accessToken, // Token de acceso
+            'token_type' => 'Bearer', // Tipo de token
+            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString() // Fecha de expiración
         ]); // Código HTTP 200 implícito: Éxito
     }
 
