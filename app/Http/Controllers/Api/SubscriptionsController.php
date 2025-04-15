@@ -7,9 +7,11 @@ use App\Http\Requests\StoreSubscriptionsRequest;
 use App\Http\Requests\UpdateSubscriptionsRequest;
 use App\Models\PaymentCard;
 use App\Models\Subscriptions;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -57,58 +59,88 @@ class SubscriptionsController extends Controller {
             ], 422);
         }
 
-        $user_id = Auth::user()->id;
-        $user_rol = Auth::user()->user_rol;
+        $user = Auth::user();
+        $user_id = $user->id;
+        $user_rol = $user->user_rol;
 
-        $user_rol == 'paciente' ?
-            $subscription_type = 'paciente_avanzado' : $subscription_type = 'profesional_avanzado';
+        $subscription_type = $user_rol === 'paciente' ? 'paciente_avanzado' : 'profesional_avanzado';
 
-        // Check if the user already has a subscription
-        $subscription = Subscriptions::where('user_id', $user_id)
+        // Verificar suscripción activa con el mismo período
+        $existingSubscription = Subscriptions::where('user_id', $user_id)
             ->where('subscription_status', 'activa')
             ->where('subscription_type', $subscription_type)
             ->where('subscription_period', $request->subscription_period)
             ->first();
 
-        if ($subscription) {
+        if ($existingSubscription) {
             return response()->json([
                 'message' => 'Ya tienes una suscripción activa.',
             ], 422);
         }
 
-        $paymentCard = PaymentCard::create([
-            'card_number' => $request->card_number,
-            'cardholder_name' => $request->cardholder_name,
-            'expiration_date' => $request->expiration_date,
-            'payment_provider' => strtolower($request->payment_provider),
-        ]);
+        DB::beginTransaction();
 
-        if (!$paymentCard) {
+        try {
+            $paymentCard = PaymentCard::create([
+                'card_number' => $request->card_number,
+                'cardholder_name' => $request->cardholder_name,
+                'expiration_date' => $request->expiration_date,
+                'payment_provider' => strtolower($request->payment_provider),
+            ]);
+
+            if (!$paymentCard) {
+                throw new Exception('No se pudo crear la tarjeta de pago.');
+            }
+
+            $current_subscription = Subscriptions::where('user_id', $user_id)->first();
+
+            if (!$current_subscription) {
+                $subscription = Subscriptions::create([
+                    'user_id' => $user_id,
+                    'subscription_type' => $subscription_type,
+                    'subscription_status' => 'activa',
+                    'subscription_period' => $request->subscription_period,
+                    'start_date' => now(),
+                    'end_date' => now()->addDays(14),
+                    'trial_ends_at' => now()->addDays(14),
+                    'auto_renew' => false,
+                    'payment_card_id' => $paymentCard->id
+                ]);
+            } else {
+                $current_subscription->subscription_status = 'activa';
+                $current_subscription->subscription_type = $subscription_type;
+                $current_subscription->subscription_period = $request->subscription_period;
+                $current_subscription->start_date = now();
+                $current_subscription->end_date = now()->addDays(14);
+                $current_subscription->trial_ends_at = now()->addDays(14);
+                $current_subscription->auto_renew = false;
+                $current_subscription->payment_card_id = $paymentCard->id;
+
+                $current_subscription->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Te has suscrito exitosamente a SalusNexus.',
+                'subscription' => $subscription,
+            ], 201);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            // Elimina la tarjeta si fue creada
+            if (isset($paymentCard)) {
+                $paymentCard->delete();
+            }
+
             return response()->json([
                 'status' => false,
-                'message' => 'Ocurrió un error al crear la tarjeta de pago.',
-                'errors' => $validation->errors(),
+                'message' => 'Ocurrió un error al crear la suscripción.',
+                'errors' => $e->getMessage(),
             ], 422);
         }
-
-        $current_subscription = Subscriptions::where('user_id', $user_id)
-            ->first();
-
-        $current_subscription->subscription_status = 'activa';
-        $current_subscription->subscription_type = $subscription_type;
-        $current_subscription->subscription_period = $request->subscription_period;
-        $current_subscription->start_date = now();
-        $current_subscription->end_date = now()->addDays(14);
-        $current_subscription->trial_ends_at = now()->addDays(14);
-        $current_subscription->auto_renew = false;
-        $current_subscription->payment_card_id = $paymentCard->id;
-        $current_subscription->save();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Te has suscrito exitosamente a SalusNexus.',
-            'subscription' => $subscription,
-        ], 201);
     }
 
     /**

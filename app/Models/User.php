@@ -70,8 +70,8 @@ class User extends Authenticatable {
 
         if($user_rol == 'paciente'){
             return DB::table('users')
-                ->join('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
-                ->join('subscriptions', 'users.id', '=', 'subscriptions.user_id')
+                ->leftJoin('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
+                ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id')
                 ->select(
                     'users.id AS user_id',
                     'users.first_name',
