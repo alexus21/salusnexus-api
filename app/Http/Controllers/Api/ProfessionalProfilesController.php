@@ -200,35 +200,34 @@ class ProfessionalProfilesController extends Controller {
             $pfp_path = $this->saveProfilePhoto($request);
             $license_path = $this->saveLicensePhoto($request);
 
+            // Primero verificamos si existe el perfil profesional
+            $professional_id = DB::table('professional_profiles')
+                ->where('user_id', Auth::user()->id)
+                ->value('id');
+
+            if (!$professional_id) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontró el perfil profesional'
+                ], 404);
+            }
+
             // Guardar la información del usuario en la base de datos
             DB::table('professional_profiles')->where('user_id', Auth::user()->id)->update([
                 'biography' => $request->biography,
                 'home_visits' => true,
                 'years_of_experience' => $request->years_of_experience,
                 'website_url' => $request->website_url,
-                'user_id' => Auth::user()->id,
             ]);
+        } catch (Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Error actualizando perfil profesional: ' . $e->getMessage()
+            ], 500);
+        }
 
-            $professional_id = DB::table('professional_profiles')
-                ->where('user_id', Auth::user()->id)
-                ->value('id');
-
-            log::info($professional_id);
-
-            $medicalLicense = new MedicalLicenses();
-            $medicalLicense = $medicalLicense->create([
-                'professional_profile_id' => $professional_id,
-                'license_number' => $request->license_number,
-                'licensing_authority' => $request->license_authority,
-                'issue_date' => $request->issue_date,
-                'expiration_date' => $request->expiration_date,
-                'license_image_path' => $license_path,
-            ]);
-
-            $medicalLicense->save();
-
-            $medicalClinic = new MedicalClinic();
-            $medicalClinic = $medicalClinic->create([
+        try {
+            $medicalClinic = MedicalClinic::create([
                 'clinic_name' => $request->clinic_name,
                 'address' => $request->clinic_address,
                 'address_reference' => $request->clinic_address_reference,
@@ -246,18 +245,72 @@ class ProfessionalProfilesController extends Controller {
             if ($request->hasFile('waiting_room_photo')) {
                 $waitingRoomImageName = Str::uuid() . '.' . $request->waiting_room_photo->extension();
                 $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images/clinics_pics', $waitingRoomImageName, 's3');
-                Storage::disk('s3')->url($waitingRoomPath);
+                // Almacenar el URL generado correctamente
+                $waitingRoomUrl = Storage::disk('s3')->url($waitingRoomPath);
                 $medicalClinic->waiting_room_photo = $waitingRoomPath;
+                $medicalClinic->save(); // Solo llamar a save() si se modifican propiedades después de create()
             }
 
             if ($request->hasFile('office_photo')) {
                 $officeImageName = Str::uuid() . '.' . $request->office_photo->extension();
                 $officePath = $request->file('office_photo')->storeAs('images/clinics_pics', $officeImageName, 's3');
-                Storage::disk('s3')->url($officePath);
+                // Almacenar el URL generado correctamente
+                $officeUrl = Storage::disk('s3')->url($officePath);
                 $medicalClinic->office_photo = $officePath;
+                $medicalClinic->save(); // Solo llamar a save() si se modifican propiedades después de create()
             }
+        } catch (Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Error creando clínica médica: ' . $e->getMessage()
+            ], 500);
+        }
 
-            $medicalClinic->save();
+        try {
+            $medicalLicense = MedicalLicenses::create([
+                'professional_profile_id' => $professional_id,
+                'license_number' => $request->license_number,
+                'licensing_authority' => $request->license_authority,
+                'issue_date' => $request->issue_date,
+                'expiration_date' => $request->expiration_date,
+                'license_image_path' => $license_path,
+            ]);
+            // No es necesario llamar a save() después de create()
+        } catch (Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Error creando licencia médica: ' . $e->getMessage()
+            ], 500);
+        }
+
+        try {
+            // Check if the user already has a subscription
+            $existingSubscription = Subscriptions::where('user_id', Auth::user()->id)
+                ->where('subscription_status', 'activa')
+                ->first();
+
+            if (!$existingSubscription) {
+                // Verificar si el parámetro subscription_period existe
+                $subscriptionPeriod = $request->has('subscription_period') ? $request->subscription_period : 'mensual';
+                // Crear suscripción gratuita
+                (new SubscriptionsController())->store(Auth::user()->id, 'profesional', $subscriptionPeriod);
+            }
+        } catch (Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Error creando suscripción: ' . $e->getMessage()
+            ], 500);
+        }
+
+        try {
+            // Verificar que el usuario existe
+            $user = User::find(Auth::user()->id);
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 404);
+            }
 
             DB::table('users')->where('id', Auth::user()->id)->update([
                 'address' => $request->home_address,
@@ -270,18 +323,6 @@ class ProfessionalProfilesController extends Controller {
                 'email_verified_at' => Carbon::now(),
             ]);
 
-            // Check if the user already has a subscription
-            $existingSubscription = Subscriptions::where('user_id', Auth::user()->id)
-                ->where('subscription_status', 'activa')
-                ->first();
-
-            if (!$existingSubscription) {
-                // Crear suscripción gratuita
-                (new SubscriptionsController())->store(Auth::user()->id, 'profesional', $request->subscription_period);
-            }
-
-            (new MedicalClinicController())->store($request);
-
             $user = ((new User())->getUserInfoByItsId(Auth::user()->id));
 
             return response()->json([
@@ -292,7 +333,7 @@ class ProfessionalProfilesController extends Controller {
         } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Error: ' . $e->getMessage()
+                'message' => 'Error actualizando usuario: ' . $e->getMessage()
             ], 500);
         }
     }
