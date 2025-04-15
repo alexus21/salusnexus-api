@@ -66,9 +66,9 @@ class MedicalClinicController extends Controller {
             'clinic_name.max' => 'El nombre de la clínica no debe exceder los 200 caracteres.',
             'description.string' => 'La descripción debe ser una cadena de texto.',
             'description.max' => 'La descripción no debe exceder los 512 caracteres.',
-            'address.required' => 'La dirección es obligatoria.',
-            'address.string' => 'La dirección debe ser una cadena de texto.',
-            'address.max' => 'La dirección no debe exceder los 512 caracteres.',
+            'clinic_address.required' => 'La dirección es obligatoria.',
+            'clinic_address.string' => 'La dirección debe ser una cadena de texto.',
+            'clinic_address.max' => 'La dirección no debe exceder los 512 caracteres.',
             'city_id.required' => 'La ciudad es obligatoria.',
             'facade_photo.required' => 'La foto de la fachada es obligatoria.',
             'facade_photo.image' => 'La foto de la fachada debe ser una imagen.',
@@ -76,18 +76,6 @@ class MedicalClinicController extends Controller {
             'facade_photo.max' => 'La foto de la fachada no debe exceder los 2MB.',
             'speciality_type.required' => 'El tipo de especialidad es obligatorio.',
         ];
-
-        if ($request->has('waiting_room_photo')) {
-            $rules['waiting_room_photo'] = 'image|mimes:jpeg,png,jpg,gif|max:2048';
-            $messages['waiting_room_photo.image'] = 'La foto de la sala de espera debe ser una imagen.';
-            $messages['waiting_room_photo.mimes'] = 'La foto de la sala de espera debe ser un archivo de tipo: jpeg, png, jpg, gif.';
-        }
-
-        if ($request->has('office_photo')) {
-            $rules['office_photo'] = 'image|mimes:jpeg,png,jpg,gif|max:2048';
-            $messages['office_photo.image'] = 'La foto de la oficina debe ser una imagen.';
-            $messages['office_photo.mimes'] = 'La foto de la oficina debe ser un archivo de tipo: jpeg, png, jpg, gif.';
-        }
 
         $validator = Validator::make($request->all(), $rules, $messages);
 
@@ -100,73 +88,64 @@ class MedicalClinicController extends Controller {
         }
 
         try {
+            // Verificamos que exista el perfil profesional
             $professional_id = DB::table('professional_profiles')
                 ->where('user_id', Auth::id())
                 ->value('id');
 
-            $medicalClinic = new MedicalClinic();
-            $medicalClinic->clinic_name = $request->clinic_name;
-            $medicalClinic->address = $request->address;
-            $medicalClinic->address_reference = $request->address_reference;
-            $medicalClinic->clinic_latitude = $request->clinic_latitude;
-            $medicalClinic->clinic_longitude = $request->clinic_longitude;
-            $medicalClinic->description = $request->description;
-            $medicalClinic->city_id = $request->city_id;
-            $medicalClinic->professional_id = $professional_id;
-            $medicalClinic->speciality_type = strtolower($request->speciality_type);
-
-            $user = User::find(Auth::id());
-            if ($user) {
-                $user->address = $request->address;
-                $user->save();
-            }
-
-            if(!$request->hasFile('facade_photo')){
+            if (!$professional_id) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'No se encontró ninguna imagen'
-                ], 400);
+                    'status' => false,
+                    'message' => 'No se encontró el perfil profesional'
+                ], 404);
             }
 
-            // Generar nombre único para la imagen
+            // Crear el directorio si no existe
+            if (!Storage::disk('s3')->exists('images/clinics_pics')) {
+                Storage::disk('s3')->makeDirectory('images/clinics_pics');
+            }
+
+            // Procesamos la foto de fachada
             $imageName = Str::uuid() . '.' . $request->facade_photo->extension();
+            $facadePath = $request->file('facade_photo')->storeAs('images/clinics_pics', $imageName, 's3');
+            $facadeUrl = Storage::disk('s3')->url($facadePath);
 
-            // Obtener ruta anterior de la imagen
-            $oldImagePath = DB::table('users')
-                ->where('id', Auth::id())
-                ->value('facade_photo');
+            // Creamos la clínica médica
+            $medicalClinic = MedicalClinic::create([
+                'clinic_name' => $request->clinic_name,
+                'address' => $request->clinic_address,
+                'address_reference' => $request->clinic_address_reference ?? null,
+                'clinic_latitude' => $request->clinic_latitude,
+                'clinic_longitude' => $request->clinic_longitude,
+                'description' => $request->description ?? null,
+                'city_id' => $request->city_id,
+                'professional_id' => $professional_id,
+                'speciality_type' => strtolower($request->speciality_type),
+                'facade_photo' => $facadePath,
+                'waiting_room_photo' => '-',
+                'office_photo' => '-',
+            ]);
 
-            if (!Storage::disk('s3')->exists('images')) {
-                Storage::disk('s3')->makeDirectory('images');
-            }
-
-            // Verificar y eliminar la imagen anterior si existe
-            if ($oldImagePath && Storage::disk('s3')->exists($oldImagePath)) {
-                Storage::disk('s3')->delete($oldImagePath);
-            }
-
-            // Guardar la imagen en el disco (puedes usar public, s3, etc.)
-            $path = $request->file('facade_photo')->storeAs('images', $imageName, 's3');
-
-            // URL pública de la imagen (si está en storage/public)
-            $url = Storage::disk('s3')->url($path);
-
-            // Guardar la información de la clinica en la base de datos
-            $medicalClinic->facade_photo = '-';
-
-            if($request->hasFile('waiting_room_photo')){
+            // Procesamos la foto de sala de espera si existe
+            if ($request->hasFile('waiting_room_photo')) {
                 $waitingRoomImageName = Str::uuid() . '.' . $request->waiting_room_photo->extension();
-                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images', $waitingRoomImageName, 's3');
-                $medicalClinic->waiting_room_photo = Storage::disk('s3')->url($waitingRoomPath);
+                $waitingRoomPath = $request->file('waiting_room_photo')->storeAs('images/clinics_pics', $waitingRoomImageName, 's3');
+                $waitingRoomUrl = Storage::disk('s3')->url($waitingRoomPath);
+                $medicalClinic->waiting_room_photo = $waitingRoomPath;
             }
 
-            if($request->hasFile('office_photo')){
+            // Procesamos la foto de oficina si existe
+            if ($request->hasFile('office_photo')) {
                 $officeImageName = Str::uuid() . '.' . $request->office_photo->extension();
-                $officePath = $request->file('office_photo')->storeAs('images', $officeImageName, 's3');
-                $medicalClinic->office_photo = Storage::disk('s3')->url($officePath);
+                $officePath = $request->file('office_photo')->storeAs('images/clinics_pics', $officeImageName, 's3');
+                $officeUrl = Storage::disk('s3')->url($officePath);
+                $medicalClinic->office_photo = $officePath;
             }
 
-            $medicalClinic->save();
+            // Guardamos los cambios si se han añadido fotos adicionales
+            if ($request->hasFile('waiting_room_photo') || $request->hasFile('office_photo')) {
+                $medicalClinic->save();
+            }
 
             return response()->json([
                 'success' => true,
