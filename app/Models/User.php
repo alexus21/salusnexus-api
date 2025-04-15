@@ -71,6 +71,7 @@ class User extends Authenticatable {
         if($user_rol == 'paciente'){
             return DB::table('users')
                 ->join('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
+                ->join('subscriptions', 'users.id', '=', 'subscriptions.user_id')
                 ->select(
                     'users.id AS user_id',
                     'users.first_name',
@@ -90,7 +91,8 @@ class User extends Authenticatable {
                     'users.verified',
                     'patient_profiles.id AS patient_profile_id',
                     'patient_profiles.emergency_contact_name',
-                    'patient_profiles.emergency_contact_phone'
+                    'patient_profiles.emergency_contact_phone',
+                    'subscriptions.subscription_type'
                 )
                 ->where('users.id', $id)
                 ->first();
