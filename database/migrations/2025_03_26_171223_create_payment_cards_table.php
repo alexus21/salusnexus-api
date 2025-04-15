@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('payment_cards', function (Blueprint $table) {
             $table->id();
-            $table->string('card_number')->unique();
+            $table->string('card_number');
             $table->string('cardholder_name');
             $table->string('expiration_date');
             $table->enum('payment_provider', [

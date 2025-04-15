@@ -92,7 +92,8 @@ class User extends Authenticatable {
                     'patient_profiles.id AS patient_profile_id',
                     'patient_profiles.emergency_contact_name',
                     'patient_profiles.emergency_contact_phone',
-                    'subscriptions.subscription_type'
+                    'subscriptions.subscription_type',
+                    'subscriptions.subscription_period'
                 )
                 ->where('users.id', $id)
                 ->first();
@@ -101,6 +102,7 @@ class User extends Authenticatable {
         if ($user_rol == 'profesional') {
             return DB::table('users')
                 ->join('professional_profiles', 'users.id', '=', 'professional_profiles.user_id')
+                ->join('subscriptions', 'users.id', '=', 'subscriptions.user_id')
                 ->select(
                     'users.id AS user_id',
                     'users.first_name',
@@ -120,7 +122,9 @@ class User extends Authenticatable {
                     'users.verified',
                     'professional_profiles.id AS professional_profiles_id',
                     'professional_profiles.years_of_experience',
-                    'professional_profiles.website_url'
+                    'professional_profiles.website_url',
+                    'subscriptions.subscription_type',
+                    'subscriptions.subscriptions.subscription_period'
                 )
                 ->where('users.id', $id)
                 ->first();

@@ -60,17 +60,14 @@ class AuthController extends Controller {
             'gender.string' => 'El género debe ser una cadena de texto.',
         ];
 
-        // Validación de los datos recibidos según las reglas y mensajes definidos
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        // Si la validación falla, devolver error con detalles
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
-                'errors' => $validator->errors() // Lista de errores específicos
+                'errors' => $validator->errors()
             ], 400);
-            // Código HTTP 400: Solicitud incorrecta
         }
 
         // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)

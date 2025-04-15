@@ -25,8 +25,6 @@ class SubscriptionsController extends Controller {
      * Show the form for creating a new resource.
      */
     public function create(Request $request): JsonResponse {
-        log::info($request);
-
         if (!Auth::check()) {
             return response()->json([
                 'message' => 'No autorizado',
@@ -66,23 +64,15 @@ class SubscriptionsController extends Controller {
             $subscription_type = 'paciente_avanzado' : $subscription_type = 'profesional_avanzado';
 
         // Check if the user already has a subscription
-        $existingSubscription = Subscriptions::where('user_id', $user_id)
+        $subscription = Subscriptions::where('user_id', $user_id)
             ->where('subscription_status', 'activa')
+            ->where('subscription_type', $subscription_type)
+            ->where('subscription_period', $request->subscription_period)
             ->first();
 
-        if ($existingSubscription) {
+        if ($subscription) {
             return response()->json([
                 'message' => 'Ya tienes una suscripción activa.',
-            ], 422);
-        }
-
-        $validation = Validator::make($request->all(), $rules, $messages);
-
-        if ($validation->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Ocurrió un error al validar los datos.',
-                'errors' => $validation->errors(),
             ], 422);
         }
 
@@ -101,31 +91,24 @@ class SubscriptionsController extends Controller {
             ], 422);
         }
 
-        $subscription = Subscriptions::create([
-            'user_id' => $user_id,
-            'subscription_type' => $subscription_type,
-            'subscription_status' => 'activa',
-            'subscription_period' => $request->subscription_period,
-            'start_date' => now(),
-            'end_date' => now()->addDays(14),
-            'trial_ends_at' => now()->addDays(14),
-            'auto_renew' => false,
-            'payment_card_id' => $paymentCard->id
-        ]);
+        $current_subscription = Subscriptions::where('user_id', $user_id)
+            ->first();
 
-        if ($subscription) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Te has suscrito exitosamente a SalusNexus.',
-                'subscription' => $subscription,
-            ], 201);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Ocurrió un error al crear la suscripción.',
-                'errors' => $validation->errors(),
-            ], 422);
-        }
+        $current_subscription->subscription_status = 'activa';
+        $current_subscription->subscription_type = $subscription_type;
+        $current_subscription->subscription_period = $request->subscription_period;
+        $current_subscription->start_date = now();
+        $current_subscription->end_date = now()->addDays(14);
+        $current_subscription->trial_ends_at = now()->addDays(14);
+        $current_subscription->auto_renew = false;
+        $current_subscription->payment_card_id = $paymentCard->id;
+        $current_subscription->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Te has suscrito exitosamente a SalusNexus.',
+            'subscription' => $subscription,
+        ], 201);
     }
 
     /**
