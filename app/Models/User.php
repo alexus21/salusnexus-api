@@ -70,6 +70,63 @@ class User extends Authenticatable {
         if ($user_rol == 'paciente') {
             return DB::table('users')
                 ->leftJoin('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
+                ->select(
+                    'users.id AS user_id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.date_of_birth',
+                    'users.gender',
+                    'users.dui',
+                    'users.phone',
+                    'users.address AS home_address',
+                    'users.latitude',
+                    'users.longitude',
+                    'users.address_reference AS home_address_reference',
+                    'users.email',
+                    'users.user_rol',
+                    'users.profile_photo_path',
+                    'users.active',
+                    'users.verified',
+                )
+                ->where('users.id', $id)
+                ->first();
+        }
+
+        if ($user_rol == 'profesional') {
+            return DB::table('users')
+                ->join('professional_profiles', 'users.id', '=', 'professional_profiles.user_id')
+                ->select(
+                    'users.id AS user_id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.date_of_birth',
+                    'users.gender',
+                    'users.dui',
+                    'users.phone',
+                    'users.address AS home_address',
+                    'users.latitude',
+                    'users.longitude',
+                    'users.address_reference AS home_address_reference',
+                    'users.email',
+                    'users.user_rol',
+                    'users.profile_photo_path',
+                    'users.active',
+                    'users.verified',
+                )
+                ->where('users.id', $id)
+                ->first();
+        }
+
+        return null;
+    }
+
+    public function getUserProfile($id) {
+        $user_rol = Auth::user()->user_rol;
+        log::info('user_rol: ' . $user_rol);
+
+        if ($user_rol == 'paciente') {
+            return DB::table('users')
+                ->leftJoin('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
                 ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id')
                 ->leftJoin('payment_card_users', 'users.id', '=', 'payment_card_users.user_id')
                 ->leftJoin('payment_cards', 'payment_card_users.payment_card_id', '=', 'payment_cards.id')

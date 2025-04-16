@@ -286,7 +286,7 @@ class AuthController extends Controller {
     }
 
     public function profile(): JsonResponse {
-        $user = (new User)->getUserInfoByItsId(Auth::user()->id);
+        $user = (new User)->getUserProfile(Auth::user()->id);
 
         if ($user) {
             return response()->json([
