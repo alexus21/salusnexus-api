@@ -131,7 +131,7 @@ class User extends Authenticatable {
                     'subscriptions.subscription_type',
                     'subscriptions.subscriptions.subscription_period',
                     'subscriptions.end_date',
-                    DB::raw('TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\') AS end_date'),
+                    DB::raw('COALESCHE(TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\'), \'N/A\') AS end_date'),
                     DB::raw('COALESCE(RIGHT(payment_cards.card_number, 4), \'N/A\') AS card_number')
                 )
                 ->where('users.id', $id)
