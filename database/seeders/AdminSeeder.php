@@ -19,7 +19,7 @@ class AdminSeeder extends Seeder {
             'date_of_birth' => '2003-05-03',
             'gender' => 'masculino',
             'dui' => '12345678-9',
-            'phone' => '+503 7011 6901',
+            'phone' => '+503 7011-6901',
             'address' => 'Calle 1, San Salvador',
             'latitude' => 13.7034,
             'longitude' => -89.2034,

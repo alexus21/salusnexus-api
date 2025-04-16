@@ -112,6 +112,12 @@ class PatientProfilesController extends Controller {
 
         $validator = Validator::make($request->all(), $rules, $messages);
 
+        // Asegurarse de que el teléfono comience con el código de país "+503" (El Salvador)
+        $phone = str_starts_with($request->emergency_contact_phone, "+503") ?
+            $request->emergency_contact_phone : "+503 " . $request->emergency_contact_phone;
+        // Formatear el teléfono al estilo "+503 XXXX-XXXX"
+        $phone = preg_replace('/(\+503)\s?(\d{4})(\d{4})/', '$1 $2-$3', $phone);
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
@@ -153,7 +159,7 @@ class PatientProfilesController extends Controller {
             // Guardar la información del usuario en la base de datos
             DB::table('patient_profiles')->where('user_id', Auth::user()->id)->update([
                 'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_phone' => $request->emergency_contact_phone,
+                'emergency_contact_phone' => $phone,
             ]);
 
             DB::table('users')->where('id', Auth::user()->id)->update([
