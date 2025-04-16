@@ -63,15 +63,16 @@ class User extends Authenticatable {
         ];
     }
 
-    // Methods
     public function getUserInfoByItsId($id) {
         $user_rol = Auth::user()->user_rol;
         log::info('user_rol: ' . $user_rol);
 
-        if($user_rol == 'paciente'){
+        if ($user_rol == 'paciente') {
             return DB::table('users')
                 ->leftJoin('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
                 ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id')
+                ->leftJoin('payment_card_users', 'users.id', '=', 'payment_card_users.user_id')
+                ->leftJoin('payment_cards', 'payment_card_users.payment_card_id', '=', 'payment_cards.id')
                 ->select(
                     'users.id AS user_id',
                     'users.first_name',
@@ -93,7 +94,9 @@ class User extends Authenticatable {
                     'patient_profiles.emergency_contact_name',
                     'patient_profiles.emergency_contact_phone',
                     'subscriptions.subscription_type',
-                    'subscriptions.subscription_period'
+                    'subscriptions.subscription_period',
+                    DB::raw('TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\') AS end_date'),
+                    DB::raw('COALESCE(RIGHT(payment_cards.card_number, 4), \'N/A\') AS card_number')
                 )
                 ->where('users.id', $id)
                 ->first();
@@ -103,6 +106,8 @@ class User extends Authenticatable {
             return DB::table('users')
                 ->join('professional_profiles', 'users.id', '=', 'professional_profiles.user_id')
                 ->join('subscriptions', 'users.id', '=', 'subscriptions.user_id')
+                ->leftJoin('payment_card_users', 'users.id', '=', 'payment_card_users.user_id')
+                ->leftJoin('payment_cards', 'payment_card_users.payment_card_id', '=', 'payment_cards.id')
                 ->select(
                     'users.id AS user_id',
                     'users.first_name',
@@ -124,7 +129,10 @@ class User extends Authenticatable {
                     'professional_profiles.years_of_experience',
                     'professional_profiles.website_url',
                     'subscriptions.subscription_type',
-                    'subscriptions.subscriptions.subscription_period'
+                    'subscriptions.subscriptions.subscription_period',
+                    'subscriptions.end_date',
+                    DB::raw('TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\') AS end_date'),
+                    DB::raw('COALESCE(RIGHT(payment_cards.card_number, 4), \'N/A\') AS card_number')
                 )
                 ->where('users.id', $id)
                 ->first();
