@@ -17,6 +17,7 @@ class PaymentCard extends Model {
         'cardholder_name',
         'expiration_date',
         'payment_provider',
+        'user_id',
     ];
 
 }

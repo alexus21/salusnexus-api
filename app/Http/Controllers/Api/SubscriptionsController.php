@@ -92,6 +92,11 @@ class SubscriptionsController extends Controller {
                 throw new Exception('No se pudo crear la tarjeta de pago.');
             }
 
+            DB::table('payment_card_users')->insert([
+                'user_id' => $user_id,
+                'payment_card_id' => $paymentCard->id,
+            ]);
+
             $current_subscription = Subscriptions::where('user_id', $user_id)->first();
 
             if (!$current_subscription) {
@@ -104,7 +109,6 @@ class SubscriptionsController extends Controller {
                     'end_date' => now()->addDays(14),
                     'trial_ends_at' => now()->addDays(14),
                     'auto_renew' => false,
-                    'payment_card_id' => $paymentCard->id
                 ]);
             } else {
                 $current_subscription->subscription_status = 'activa';
@@ -114,7 +118,6 @@ class SubscriptionsController extends Controller {
                 $current_subscription->end_date = now()->addDays(14);
                 $current_subscription->trial_ends_at = now()->addDays(14);
                 $current_subscription->auto_renew = false;
-                $current_subscription->payment_card_id = $paymentCard->id;
 
                 $current_subscription->save();
             }

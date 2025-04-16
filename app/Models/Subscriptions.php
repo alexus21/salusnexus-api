@@ -23,7 +23,6 @@ class Subscriptions extends Model {
         'end_date',
         'trial_ends_at',
         'auto_renew',
-        'payment_card_id',
         'created_at',
         'updated_at'
     ];

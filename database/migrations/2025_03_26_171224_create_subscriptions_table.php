@@ -24,11 +24,6 @@ return new class extends Migration {
             $table->timestamp('end_date')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
             $table->boolean('auto_renew')->default(false);
-            $table->foreignId('payment_card_id')
-                ->nullable()
-                ->constrained('payment_cards')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
             $table->timestamps();
         });
     }
