@@ -219,7 +219,14 @@ class ProfessionalProfilesController extends Controller {
                 'years_of_experience' => $request->years_of_experience,
                 'website_url' => $request->website_url,
             ]);
-        } catch (Exception $e){
+
+            DB::table('professional_specialities')
+                ->insert([
+                    'professional_id' => $professional_id,
+                    'speciality_id' => $request->speciality_id
+                ]);
+
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Error actualizando perfil profesional: ' . $e->getMessage()
@@ -230,7 +237,7 @@ class ProfessionalProfilesController extends Controller {
             $medicalClinic = MedicalClinic::create([
                 'clinic_name' => $request->clinic_name,
                 'address' => $request->clinic_address,
-                'address_reference' => $request->clinic_address_reference,
+                'clinic_address_reference' => $request->clinic_address_reference,
                 'clinic_latitude' => $request->clinic_latitude,
                 'clinic_longitude' => $request->clinic_longitude,
                 'description' => $request->description,
@@ -259,7 +266,7 @@ class ProfessionalProfilesController extends Controller {
                 $medicalClinic->office_photo = $officePath;
                 $medicalClinic->save(); // Solo llamar a save() si se modifican propiedades después de create()
             }
-        } catch (Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Error creando clínica médica: ' . $e->getMessage()
@@ -276,7 +283,7 @@ class ProfessionalProfilesController extends Controller {
                 'license_image_path' => $license_path,
             ]);
             // No es necesario llamar a save() después de create()
-        } catch (Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Error creando licencia médica: ' . $e->getMessage()
@@ -295,7 +302,7 @@ class ProfessionalProfilesController extends Controller {
                 // Crear suscripción gratuita
                 (new SubscriptionsController())->store(Auth::user()->id, 'profesional', $subscriptionPeriod);
             }
-        } catch (Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Error creando suscripción: ' . $e->getMessage()
@@ -339,7 +346,7 @@ class ProfessionalProfilesController extends Controller {
     }
 
     private function saveProfilePhoto(Request $request): JsonResponse|string {
-        if(!$request->hasFile('profile_photo_path')){
+        if (!$request->hasFile('profile_photo_path')) {
             return response()->json([
                 'success' => false,
                 'message' => 'No se encontró ninguna imagen'
@@ -373,7 +380,7 @@ class ProfessionalProfilesController extends Controller {
     }
 
     private function saveLicensePhoto(Request $request): JsonResponse|string {
-        if(!$request->hasFile('license_image_path')){
+        if (!$request->hasFile('license_image_path')) {
             return response()->json([
                 'success' => false,
                 'message' => 'No se encontró ninguna imagen'
@@ -407,7 +414,7 @@ class ProfessionalProfilesController extends Controller {
     }
 
     private function saveFacadePhoto(Request $request) {
-        if(!$request->hasFile('facade_photo')){
+        if (!$request->hasFile('facade_photo')) {
             return response()->json([
                 'success' => false,
                 'message' => 'No se encontró ninguna imagen'

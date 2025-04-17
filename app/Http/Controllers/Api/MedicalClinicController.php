@@ -117,10 +117,10 @@ class MedicalClinicController extends Controller {
             $medicalClinic = MedicalClinic::create([
                 'clinic_name' => $request->clinic_name,
                 'address' => $request->clinic_address,
-                'address_reference' => $request->clinic_address_reference ?? null,
+                'clinic_address_reference' => $request->clinic_address_reference,
                 'clinic_latitude' => $request->clinic_latitude,
                 'clinic_longitude' => $request->clinic_longitude,
-                'description' => $request->description ?? null,
+                'description' => $request->description,
                 'city_id' => $request->city_id,
                 'professional_id' => $professional_id,
                 'speciality_type' => strtolower($request->speciality_type),
