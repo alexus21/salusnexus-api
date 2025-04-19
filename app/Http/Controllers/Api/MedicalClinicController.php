@@ -181,7 +181,7 @@ class MedicalClinicController extends Controller {
         return response()->json([
             'status' => true,
             'data' => $clinic
-        ], 201);
+        ], 200);
     }
 
     /**
