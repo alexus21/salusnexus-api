@@ -6,7 +6,6 @@ use Database\Factories\MedicalClinicFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Laravel\Passport\HasApiTokens;
 
 class MedicalClinic extends Model {
@@ -65,5 +64,13 @@ class MedicalClinic extends Model {
             });
 
         return $clinic_id ? $query->first() : $query->get();
+    }
+
+    public static function verifyClinicOwnership($clinicId, $professionalId) {
+        return DB::table('medical_clinics')
+            ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+            ->where('medical_clinics.professional_id', $professionalId)
+            ->where('medical_clinics.id', $clinicId)
+            ->first();
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CitiesController;
+use App\Http\Controllers\Api\ClinicSchedulesController;
 use App\Http\Controllers\Api\ClinicViewController;
 use App\Http\Controllers\Api\DepartmentsController;
 use App\Http\Controllers\Api\FavoritesController;
@@ -50,4 +51,12 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/favorites/get', [FavoritesController::class, 'index'])->name('favorites.index');
     Route::post('/favorites/add', [FavoritesController::class, 'store'])->name('favorites.store');
     Route::delete('/favorites/delete', [FavoritesController::class, 'destroy'])->name('favorites.delete');
+
+    /* Rutas asociadas al manejo de los horarios de las clínicas */
+    Route::get('/schedules/get/all', [ClinicSchedulesController::class, 'index'])->name('clinic-schedules.index');
+    Route::get('/schedules/get/{id}', [ClinicSchedulesController::class, 'show'])->name('clinic-schedules.show');
+    Route::get('/schedules/get/clinic/{id}', [ClinicSchedulesController::class, 'showByClinic'])->name('clinic-schedules.showByClinic');
+    Route::post('/schedules/add', [ClinicSchedulesController::class, 'store'])->name('clinic-schedules.store');
+    Route::patch('/schedules/edit/{id}', [ClinicSchedulesController::class, 'update'])->name('clinic-schedules.update');
+    Route::delete('/schedules/delete/{id}', [ClinicSchedulesController::class, 'destroy'])->name('clinic-schedules.delete');
 });
