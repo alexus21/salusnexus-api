@@ -176,7 +176,12 @@ class MedicalClinicController extends Controller {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
 
-        return response()->json((new MedicalClinic())->getClinicInfo($id), 201);
+        $clinic = (new MedicalClinic())->getClinicInfo($id);
+
+        return response()->json([
+            'status' => true,
+            'data' => $clinic
+        ], 201);
     }
 
     /**
