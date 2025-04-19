@@ -28,9 +28,18 @@ class MedicalClinicController extends Controller {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
 
+        $clinic = (new MedicalClinic())->getClinicInfo(null);
+
+        if ($clinic->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No se encontraron clínicas médicas'
+            ], 404);
+        }
+
         return response()->json([
             'status' => true,
-            'data' => (new MedicalClinic())->getClinicInfo(null)
+            'data' => $clinic
         ], 201);
     }
 
