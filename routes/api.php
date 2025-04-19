@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CitiesController;
+use App\Http\Controllers\Api\ClinicViewController;
 use App\Http\Controllers\Api\DepartmentsController;
 use App\Http\Controllers\Api\FavoritesController;
 use App\Http\Controllers\Api\MedicalClinicController;
@@ -41,6 +42,9 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::post('/medical-clinics/add', [MedicalClinicController::class, 'store'])->name('medical-clinic.store');
     Route::patch('/medical-clinics/edit/{id}', [MedicalClinicController::class, 'edit'])->name('medical-clinic.edit');
     Route::delete('/medical-clinics/delete/{id}', [MedicalClinicController::class, 'delete'])->name('medical-clinic.delete');
+
+    /* Rutas asociadas al manejo de las clínicas vistas por pacientes */
+    Route::post('/clinic-view', [ClinicViewController::class, 'store'])->name('clinic-view.store');
 
     /* Rutas asociadas al manejo de los favoritos */
     Route::get('/favorites/get', [FavoritesController::class, 'index'])->name('favorites.index');
