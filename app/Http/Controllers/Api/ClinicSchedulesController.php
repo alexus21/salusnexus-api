@@ -202,16 +202,85 @@ class ClinicSchedulesController extends Controller {
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateClinicSchedulesRequest $request, ClinicSchedules $clinicSchedules) {
+    public function update(Request $request, int $id) {
         if (!Auth::check() && Auth::user()->role !== 'profesional' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
 
+        $professional_id = DB::table('professional_profiles')
+            ->where('user_id', Auth::user()->id)
+            ->value('id');
+
+        $clinic_id = DB::table('clinic_schedules')
+            ->where('id', $id)
+            ->value('clinic_id');
+
+        $clinic = MedicalClinic::verifyClinicOwnership($clinic_id, $professional_id);
+
+        if (!$clinic) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Acceso no autorizado.'
+            ], 403);
+        }
+
+        $rules = [
+            'day_of_the_week' => 'required|string|max:20',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+        ];
+
+        $messages = [
+            'day_of_the_week.required' => 'El campo day_of_the_week es obligatorio.',
+            'day_of_the_week.string' => 'El campo day_of_the_week debe ser una cadena de texto.',
+            'day_of_the_week.max' => 'El campo day_of_the_week no puede tener más de 20 caracteres.',
+            'start_time.required' => 'El campo start_time es obligatorio.',
+            'start_time.date_format' => 'El campo start_time debe tener el formato HH:MM.',
+            'end_time.required' => 'El campo end_time es obligatorio.',
+            'end_time.date_format' => 'El campo end_time debe tener el formato HH:MM.',
+            'end_time.after' => 'El campo end_time debe ser posterior a start_time.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
         try {
-            $clinicSchedules->update($request->all());
+            $schedule = ClinicSchedules::find($id);
+
+            if (!$schedule) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Horario no encontrado'
+                ], 404);
+            }
+
+            // Verificar si el horario ya existe
+            $existingSchedule = ClinicSchedules::where('clinic_id', $schedule->clinic_id)
+                ->where('day_of_the_week', $request->day_of_the_week)
+                ->where('start_time', $request->start_time)
+                ->where('end_time', $request->end_time)
+                ->where('id', '!=', $id)
+                ->first();
+
+            if ($existingSchedule) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Este horario ya existe para esta clínica.'
+                ], 409);
+            }
+
+            $schedule->update($request->all());
+
             return response()->json([
                 'status' => true,
-                'data' => $clinicSchedules
+                'data' => $schedule,
+                'message' => 'Horario actualizado correctamente'
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -224,13 +293,40 @@ class ClinicSchedulesController extends Controller {
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ClinicSchedules $clinicSchedules) {
+    public function destroy($id) {
         if (!Auth::check() && Auth::user()->role !== 'profesional' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
 
+        $professional_id = DB::table('professional_profiles')
+            ->where('user_id', Auth::user()->id)
+            ->value('id');
+
+        $clinic_id = DB::table('clinic_schedules')
+            ->where('id', $id)
+            ->value('clinic_id');
+
+        $clinic = MedicalClinic::verifyClinicOwnership($clinic_id, $professional_id);
+
+        if (!$clinic) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Acceso no autorizado.'
+            ], 403);
+        }
+
         try {
-            $clinicSchedules->delete();
+            $schedule = ClinicSchedules::find($id);
+
+            if (!$schedule) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Horario no encontrado'
+                ], 404);
+            }
+
+            $schedule->delete();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Horario eliminado correctamente'
