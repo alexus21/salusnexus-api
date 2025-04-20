@@ -15,8 +15,8 @@ return new class extends Migration {
                 ->constrained('appointments')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignId('professional_user_id')
-                ->constrained('professional_profiles')
+            $table->foreignId('clinic_id')
+                ->constrained('medical_clinics')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
             $table->foreignId('patient_user_id')

@@ -192,6 +192,7 @@ class AuthController extends Controller {
         $rules = [
             'email' => 'required|email',    // Correo obligatorio y debe ser un email válido
             'password' => 'required|string', // Contraseña obligatoria y debe ser texto
+            'user_rol' => 'required|in:paciente,profesional', // Rol de usuario obligatorio y debe ser uno de los valores permitidos
         ];
 
         // Mensajes personalizados para errores de validación
@@ -200,6 +201,7 @@ class AuthController extends Controller {
             'email.email' => 'El correo electrónico debe ser válido',
             'password.required' => 'La contraseña es requerida',
             'password.string' => 'La contraseña debe ser texto',
+            'user_rol.required' => 'El rol de usuario es requerido',
         ];
 
         // Crea un validador con los datos de la solicitud, las reglas y los mensajes
@@ -215,7 +217,7 @@ class AuthController extends Controller {
         }
 
         // Extrae las credenciales (email y contraseña) de la solicitud
-        $credentials = request(['email', 'password']);
+        $credentials = request(['email', 'password', 'user_rol']);
 
         // Intenta autenticar al usuario con las credenciales proporcionadas
         if (!auth()->attempt($credentials)) {
@@ -236,7 +238,7 @@ class AuthController extends Controller {
         // Guarda el token con la fecha de expiración en la base de datos
         $token->save();
 
-        $user = (new User)->getUserInfoByItsId($user->id);
+        $user = (new User)->getUserProfile($user->id);
 
         // Retorna una respuesta JSON con los datos del usuario y el token generado
         return response()->json([
