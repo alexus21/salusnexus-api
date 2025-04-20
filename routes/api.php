@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PatientProfilesController;
 use App\Http\Controllers\Api\ProfessionalProfilesController;
 use App\Http\Controllers\Api\SpecialitiesController;
 use App\Http\Controllers\Api\SubscriptionsController;
+use App\Http\Controllers\SubscriptionPlanController;
 use App\Http\Middleware\NoBrowserCacheMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,12 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::post('/verification/professionals', [ProfessionalProfilesController::class, 'verifyProfessionalAccount'])->name('professionals.verifyAccount');
     Route::get('/is-verified', [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
     Route::get('/subscriptions', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
+
+    // Obtener todos los planes de suscripción con sus características y precios
+    Route::get('/subscription-plans', [SubscriptionPlanController::class, 'index'])->name('subscription-plans.index');
+
+    // Obtener un plan de suscripción filtrado por tipo y sus características (por parámetro de ruta)
+    Route::get('/subscription-plan/{type}', [SubscriptionPlanController::class, 'showByTypeParam'])->name('subscription-plan.byTypeParam');
 
     /* Rutas asociadas al manejo de las clínicas médicas */
     Route::get('/medical-clinics/view', [MedicalClinicController::class, 'index'])->name('medical-clinic.index');

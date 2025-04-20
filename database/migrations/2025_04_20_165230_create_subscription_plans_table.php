@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('currency', 3)->default('USD');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->decimal('discount_percent', 5, 2)->nullable();
             $table->timestamps();
         });
     }
