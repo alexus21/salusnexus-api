@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Seeders\SubscriptionFeaturesSeeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,7 +21,8 @@ class DatabaseSeeder extends Seeder {
             HealthCategorySeeder::class,
             DepartmentsSeeder::class,
             CitiesSeeder::class,
-            SpecialitiesSeeder::class
+            SpecialitiesSeeder::class,
+            SubscriptionFeaturesSeeder::class,
         ]);
     }
 }

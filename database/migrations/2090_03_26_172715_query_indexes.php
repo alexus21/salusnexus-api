@@ -58,7 +58,7 @@ return new class extends Migration {
         // Antes de crear índices sobre 'appointments', verifica si la tabla existe
         if (Schema::hasTable('appointments')) {
             Schema::table('appointments', function (Blueprint $table) {
-                $table->index('appointment_datetime', 'idx_citas_fecha_hora_cita');
+                $table->index('appointment_date', 'idx_citas_fecha_hora_cita');
                 $table->index('appointment_status', 'idx_citas_estado');
             });
         }
