@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Database\Seeders\SubscriptionFeaturesSeeder;
+use Database\Seeders\SubscriptionPlansSeeder;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder {
             DepartmentsSeeder::class,
             CitiesSeeder::class,
             SpecialitiesSeeder::class,
+            SubscriptionPlansSeeder::class,
             SubscriptionFeaturesSeeder::class,
         ]);
     }
