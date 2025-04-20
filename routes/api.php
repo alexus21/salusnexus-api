@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppointmentsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\ClinicSchedulesController;
@@ -59,4 +60,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::post('/schedules/add', [ClinicSchedulesController::class, 'store'])->name('clinic-schedules.store');
     Route::patch('/schedules/edit/{id}', [ClinicSchedulesController::class, 'update'])->name('clinic-schedules.update');
     Route::delete('/schedules/delete/{id}', [ClinicSchedulesController::class, 'destroy'])->name('clinic-schedules.delete');
+
+    /* Rutas asociadas al manejo de las citas */
+    Route::post('/appointments/add', [AppointmentsController::class, 'store'])->name('appointments.store');
 });
