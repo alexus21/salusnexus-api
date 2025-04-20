@@ -122,7 +122,6 @@ class User extends Authenticatable {
 
     public function getUserProfile($id) {
         $user_rol = Auth::user()->user_rol;
-        log::info('user_rol: ' . $user_rol);
 
         if ($user_rol == 'paciente') {
             return DB::table('users')
@@ -152,7 +151,7 @@ class User extends Authenticatable {
                     'patient_profiles.emergency_contact_phone',
                     'subscriptions.subscription_type',
                     'subscriptions.subscription_period',
-                    DB::raw('TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\') AS end_date'),
+                    DB::raw('COALESCE(TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\'), \'N/A\') AS end_date'),
                     DB::raw('COALESCE(RIGHT(payment_cards.card_number, 4), \'N/A\') AS card_number')
                 )
                 ->where('users.id', $id)
@@ -186,9 +185,8 @@ class User extends Authenticatable {
                     'professional_profiles.years_of_experience',
                     'professional_profiles.website_url',
                     'subscriptions.subscription_type',
-                    'subscriptions.subscriptions.subscription_period',
-                    'subscriptions.end_date',
-                    DB::raw('COALESCHE(TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\'), \'N/A\') AS end_date'),
+                    'subscriptions.subscription_period',
+                    DB::raw('COALESCE(TO_CHAR(subscriptions.end_date, \'DD/MM/YYYY\'), \'N/A\') AS end_date'),
                     DB::raw('COALESCE(RIGHT(payment_cards.card_number, 4), \'N/A\') AS card_number')
                 )
                 ->where('users.id', $id)

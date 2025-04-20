@@ -8,6 +8,7 @@ use App\Models\Appointments;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class AppointmentsController extends Controller {
@@ -29,26 +30,23 @@ class AppointmentsController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request) {
+        log::info('Request data: ', $request->all());
+
         if (!Auth::check() && Auth::user()->role !== 'paciente' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
 
         $rules = [
-            'appointment_datetime' => 'required|date',
+            'appointment_date' => 'required|date',
             'service_type' => 'required|string',
             'visit_reason' => 'nullable|string',
-            'reminder_sent' => 'boolean',
-            'remind_me_at' => 'nullable|date',
         ];
 
         $messages = [
-            'appointment_datetime.required' => 'La fecha y hora de la cita son obligatorias.',
-            'appointment_datetime.date' => 'La fecha y hora de la cita no son válidas.',
+            'appointment_date.required' => 'El día de la cita es obligatoria.',
             'service_type.required' => 'El tipo de servicio es obligatorio.',
             'service_type.string' => 'El tipo de servicio debe ser una cadena de texto.',
             'visit_reason.string' => 'El motivo de la visita debe ser una cadena de texto.',
-            'reminder_sent.boolean' => 'El recordatorio enviado debe ser verdadero o falso.',
-            'remind_me_at.date' => 'La fecha y hora del recordatorio no son válidas.',
         ];
 
         $validation = Validator::make($request->all(), $rules, $messages);
@@ -63,16 +61,16 @@ class AppointmentsController extends Controller {
 
         try {
             $appointment = Appointments::create([
-                'appointment_datetime' => $request->input('appointment_datetime'),
-                'duration_minutes' => $request->input('duration_minutes', 30), // Default to 30 minutes if not provided
-                'appointment_status' => 'pending', // Default status
-                'service_type' => $request->input('service_type'),
-                'visit_reason' => $request->input('visit_reason'),
-                'patient_notes' => $request->input('patient_notes'),
-                'professional_notes' => $request->input('professional_notes'),
+                'appointment_date' => $request->appointment_date,
+                'duration_minutes' => 0, // Default to 30 minutes if not provided
+                'appointment_status' => 'programada', // Default status
+                'service_type' => $request->service_type,
+                'visit_reason' => $request->visit_reason,
+                'patient_notes' => null,
+                'professional_notes' => null,
                 'cancellation_reason' => null,
-                'reminder_sent' => $request->input('reminder_sent', false),
-                'remind_me_at' => $request->input('remind_me_at'),
+                'reminder_sent' => false,
+                'remind_me_at' => 0,
             ]);
 
             return response()->json([

@@ -15,7 +15,7 @@ class Appointments extends Model {
     protected $table = 'appointments';
 
     protected $fillable = [
-        'appointment_datetime',
+        'appointment_date',
         'duration_minutes',
         'appointment_status',
         'service_type',

@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('appointment_datetime');
+            $table->date('appointment_date');
             $table->integer('duration_minutes')
                 ->default(30)
                 ->nullable();
