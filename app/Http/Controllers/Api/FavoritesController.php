@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateFavoritesRequest;
 use App\Models\Favorites;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FavoritesController extends Controller {
     /**
@@ -48,6 +50,40 @@ class FavoritesController extends Controller {
      */
     public function show(Favorites $favorites) {
         //
+    }
+
+    public function getMyFavorites(): JsonResponse {
+        if (!Auth::check() || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado'], 401);
+        }
+
+        try{
+            $patient_id = DB::table('patient_profiles')
+                ->where('user_id', Auth::user()->id)
+                ->value('id');
+
+            $favorites = Favorites::where('patient_id', $patient_id)
+                ->select('clinic_id')
+                ->get();
+
+            if ($favorites->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron favoritos'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $favorites
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener los favoritos',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

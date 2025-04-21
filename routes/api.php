@@ -60,6 +60,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
 
     /* Rutas asociadas al manejo de los favoritos */
     Route::get('/favorites/get', [FavoritesController::class, 'index'])->name('favorites.index');
+    Route::get('/favorites/me', [FavoritesController::class, 'getMyFavorites'])->name('favorites.myFavorites');
     Route::post('/favorites/add', [FavoritesController::class, 'store'])->name('favorites.store');
     Route::delete('/favorites/delete', [FavoritesController::class, 'destroy'])->name('favorites.delete');
 

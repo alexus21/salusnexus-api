@@ -41,7 +41,6 @@ class MedicalClinic extends Model {
             ->join('users', 'professional_profiles.user_id', '=', 'users.id')
             ->join('professional_specialities', 'professional_profiles.id', '=', 'professional_specialities.professional_id')
             ->join('specialities', 'professional_specialities.speciality_id', '=', 'specialities.id')
-            ->leftJoin('favorites', 'medical_clinics.id', '=', 'favorites.clinic_id')
             ->select(
                 'medical_clinics.*',
                 'cities.name AS city_name',
@@ -56,8 +55,7 @@ class MedicalClinic extends Model {
                 'users.longitude',
                 'users.phone',
                 'users.email',
-                'specialities.name AS speciality_name',
-                'favorites.id AS favorite_id',
+                'specialities.name AS speciality_name'
             )
             ->when($clinic_id, function ($query, $clinic_id) {
                 return $query->where('medical_clinics.id', '=', $clinic_id);
