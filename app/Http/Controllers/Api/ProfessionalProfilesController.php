@@ -330,7 +330,7 @@ class ProfessionalProfilesController extends Controller {
                 'email_verified_at' => Carbon::now(),
             ]);
 
-            $user = ((new User())->getUserInfoByItsId(Auth::user()->id));
+            $user = ((new User())->getUserProfile(Auth::user()->id));
 
             return response()->json([
                 'status' => true,
