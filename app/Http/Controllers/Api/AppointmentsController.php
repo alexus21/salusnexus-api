@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAppointmentsRequest;
 use App\Models\Appointments;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,8 +17,68 @@ class AppointmentsController extends Controller {
     /**
      * Display a listing of the resource.
      */
-    public function index() {
-        //
+    public function index(): JsonResponse {
+        if (!Auth::check() || Auth::user()->user_rol !== 'profesional' || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        try {
+            $appointments = Appointments::getAllAppointments();
+
+            if ($appointments->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron citas'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $appointments
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Error al obtener citas: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener citas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function myAppointments(): JsonResponse {
+        if (!Auth::check() || Auth::user()->user_rol !== 'paciente' || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        try {
+            $patient_id = DB::table('patient_profiles')
+                ->where('user_id', Auth::user()->id)
+                ->value('id');
+
+            $appointments = Appointments::getAllUserAppointments($patient_id);
+
+            if ($appointments->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron citas'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $appointments
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Error al obtener citas: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener citas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -30,8 +92,6 @@ class AppointmentsController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request) {
-        log::info('Request data: ', $request->all());
-
         if (!Auth::check() && Auth::user()->role !== 'paciente' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -72,6 +132,24 @@ class AppointmentsController extends Controller {
                 'reminder_sent' => false,
                 'remind_me_at' => 0,
             ]);
+
+            $patient_user_id = DB::table('patient_profiles')
+                ->where('user_id', Auth::user()->id)
+                ->value('id');
+
+            $appointment_users = DB::table('appointment_users')
+                ->insert([
+                    'appointment_id' => $appointment->id,
+                    'clinic_id' => $request->clinic_id,
+                    'patient_user_id' => $patient_user_id,
+                ]);
+
+            if (!$appointment_users) {
+                return response()->json([
+                    'message' => 'Error al asignar la cita al usuario',
+                    'status' => false
+                ], 500);
+            }
 
             return response()->json([
                 'message' => 'Cita creada con éxito',

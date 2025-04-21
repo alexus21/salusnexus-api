@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ProfessionalProfilesController;
 use App\Http\Controllers\Api\SpecialitiesController;
 use App\Http\Controllers\Api\SubscriptionPlanController;
 use App\Http\Controllers\Api\SubscriptionsController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\NoBrowserCacheMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,9 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/is-verified', [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
     Route::get('/subscriptions/me', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
 
+    /* Rutas asociadas al manejo de los perfiles de los usuarios */
+    Route::get('/userprofile/{id}', [UserController::class, 'show'])->name('auth.show');
+
     /* Rutas asociadas al manejo de las clínicas médicas */
     Route::get('/medical-clinics/view', [MedicalClinicController::class, 'index'])->name('medical-clinic.index');
     Route::get('/medical-clinics/show/{id}', [MedicalClinicController::class, 'show'])->name('medical-clinic.show');
@@ -73,5 +77,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::delete('/schedules/delete/{id}', [ClinicSchedulesController::class, 'destroy'])->name('clinic-schedules.delete');
 
     /* Rutas asociadas al manejo de las citas */
+    Route::get('/appointments/get', [AppointmentsController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/me', [AppointmentsController::class, 'myAppointments'])->name('appointments.myAppointments');
     Route::post('/appointments/add', [AppointmentsController::class, 'store'])->name('appointments.store');
 });
