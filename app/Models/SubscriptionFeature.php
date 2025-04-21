@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SubscriptionFeature extends Model
-{
+class SubscriptionFeature extends Model {
     use HasFactory;
 
     protected $fillable = [
@@ -14,8 +13,7 @@ class SubscriptionFeature extends Model
         'subscription_type',
     ];
 
-    public function plan()
-    {
+    public function plan() {
         return $this->belongsTo(SubscriptionPlan::class, 'subscription_type', 'subscription_type');
     }
 }

@@ -118,7 +118,7 @@ return new class extends Migration {
         if (Schema::hasTable('professional_profiles')) {
             Schema::table('professional_profiles', function (Blueprint $table) {
                 $table->dropIndex('idx_perfiles_profesionales_usuario_id');
-                $table->dropIndex('idx_perfiles_profesionales_departamento');
+//                $table->dropIndex('idx_perfiles_profesionales_departamento');
             });
         }
         if (Schema::hasTable('professional_specialties')) {
