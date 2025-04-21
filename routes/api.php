@@ -80,4 +80,8 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/appointments/get', [AppointmentsController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/me', [AppointmentsController::class, 'myAppointments'])->name('appointments.myAppointments');
     Route::post('/appointments/add', [AppointmentsController::class, 'store'])->name('appointments.store');
+
+    /* Rutas asociadas al manejo de los perfiles de los pacientes */
+    Route::get('/patients/get/ages', [PatientProfilesController::class, 'getPatientsAge'])->name('patients.getAges');
+    Route::get('/patients/get/closer', [PatientProfilesController::class, 'getPatientsCloseToArea'])->name('patients.closer');
 });

@@ -8,23 +8,15 @@ use App\Http\Requests\UpdatePatientProfilesRequest;
 use App\Models\PatientProfiles;
 use App\Models\User;
 use App\Rules\DUIRule;
-use App\Rules\EmailRule;
-use App\Rules\PhoneNumberRule;
 use Exception;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Foundation\Application;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
 
 class PatientProfilesController extends Controller {
     /**
@@ -126,7 +118,7 @@ class PatientProfilesController extends Controller {
         }
 
         try {
-            if(!$request->hasFile('profile_photo_path')) {
+            if (!$request->hasFile('profile_photo_path')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La imagen de perfil es requerida'
@@ -189,5 +181,137 @@ class PatientProfilesController extends Controller {
                 'message' => 'Error al subir la imagen: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getPatientsAge(): JsonResponse {
+        if (!Auth::check() && Auth::user()->user_rol !== 'profesional') {
+            return response()->json([
+                'message' => 'No autorizado',
+            ], 401);
+        }
+
+        try {
+            $patient = DB::table('patient_profiles')
+                ->select('users.date_of_birth')
+                ->join('users', 'patient_profiles.user_id', '=', 'users.id')
+                ->get();
+
+            if (!$patient) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Paciente no encontrado'
+                ], 404);
+            }
+
+            // Obtener la edad de cada date_of_birth de la colección
+            $ages = $patient->map(function ($item) {
+                return Carbon::parse($item->date_of_birth)->age;
+            });
+
+            // Ordenar de mayor a menor
+            $ages = $ages->sortDesc();
+
+            // Filtrar: edad - cantidad de pacientes con esa edad:
+            $ages = $ages->countBy()->map(function ($item, $key) {
+                return [
+                    'age' => $key,
+                    'count' => $item
+                ];
+            })->values();
+
+            // Devolver la edad de cada paciente
+            return response()->json([
+                'status' => true,
+                'ages' => $ages,
+                'message' => 'Edad de los pacientes obtenida correctamente'
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener la edad del paciente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getPatientsCloseToArea(): JsonResponse {
+        if (!Auth::check() && Auth::user()->user_rol !== 'profesional') {
+            return response()->json([
+                'message' => 'No autorizado',
+            ], 401);
+        }
+
+        try {
+            $patients = DB::table('patient_profiles')
+                ->select('users.latitude', 'users.longitude')
+                ->join('users', 'patient_profiles.user_id', '=', 'users.id')
+                ->get();
+
+            if ($patients->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron pacientes'
+                ], 404);
+            }
+
+            // Obtener la distancia entre cada paciente y el área de trabajo
+            $areaLatitude = Auth::user()->latitude;
+            $areaLongitude = Auth::user()->longitude;
+
+            $patients->transform(function ($item) use ($areaLatitude, $areaLongitude) {
+                $distance = $this->haversineGreatCircleDistance($areaLatitude, $areaLongitude, $item->latitude, $item->longitude);
+                $roundedDistance = round($distance, 2);
+                return [
+                    'latitude' => $item->latitude,
+                    'longitude' => $item->longitude,
+                    'distance' => $roundedDistance
+                ];
+            });
+
+            // Filtrar pacientes a 10 km o menos
+            $closePatients = $patients->filter(function ($item) {
+                return $item['distance'] <= 10;
+            });
+
+            // Ordenar por distancia
+            $closePatients = $closePatients->sortBy('distance', SORT_NATURAL, true);
+
+            // Obtener el número de pacientes cercanos
+            $number = $closePatients->count();
+
+            return response()->json([
+                'status' => true,
+                'patients' => $closePatients->values(),
+                'number' => $number,
+                'message' => 'Pacientes cercanos obtenidos correctamente'
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener los pacientes cercanos',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function haversineGreatCircleDistance($areaLatitude, $areaLongitude, $latitude, $longitude) {
+        $earthRadius = 6371; // Radio de la Tierra en kilómetros
+
+        $latFrom = deg2rad($areaLatitude);
+        $lonFrom = deg2rad($areaLongitude);
+        $latTo = deg2rad($latitude);
+        $lonTo = deg2rad($longitude);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $a = sin($latDelta / 2) * sin($latDelta / 2) +
+            cos($latFrom) * cos($latTo) *
+            sin($lonDelta / 2) * sin($lonDelta / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c; // Distancia en kilómetros
     }
 }
