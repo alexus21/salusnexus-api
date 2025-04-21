@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreSubscriptionsRequest;
 use App\Http\Requests\UpdateSubscriptionsRequest;
 use App\Models\PaymentCard;
 use App\Models\Subscriptions;
@@ -12,7 +11,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SubscriptionsController extends Controller {
@@ -192,7 +190,13 @@ class SubscriptionsController extends Controller {
         }
 
         try {
-            $subscription = Subscriptions::where('user_id', Auth::user()->id)
+            $subscription = DB::table('subscriptions')
+                ->join('subscription_plans', 'subscriptions.subscription_type', '=', 'subscription_plans.subscription_type')
+                ->select(
+                    'subscriptions.*',
+                    'subscription_plans.*',
+                )
+                ->where('subscriptions.user_id', Auth::user()->id)
                 ->first();
 
             if ($subscription) {
