@@ -193,7 +193,6 @@ class SubscriptionsController extends Controller {
 
         try {
             $subscription = Subscriptions::where('user_id', Auth::user()->id)
-                ->select('subscription_type',)
                 ->first();
 
             if ($subscription) {
