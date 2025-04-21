@@ -185,23 +185,35 @@ class SubscriptionsController extends Controller {
     }
 
     public function mySubscription(): JsonResponse {
-        $user_id = Auth::user()->id;
-
-        $subscription = Subscriptions::where('user_id', $user_id)
-            ->where('subscription_status', 'activa')
-            ->first();
-
-        if ($subscription) {
+        if (!Auth::check()) {
             return response()->json([
-                'status' => true,
-                'message' => 'Ya posees una suscripción activa.',
-                'subscription' => $subscription,
-            ], 200);
-        } else {
+                'message' => 'No autorizado',
+            ], 401);
+        }
+
+        try {
+            $subscription = Subscriptions::where('user_id', Auth::user()->id)
+                ->select('subscription_type',)
+                ->first();
+
+            if ($subscription) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Suscripción encontrada.',
+                    'subscription' => $subscription,
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontró la suscripción.',
+                ], 404);
+            }
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'No tienes una suscripción activa. ¿Deseas agregar una?',
-            ], 404);
+                'message' => 'Ocurrió un error al obtener la suscripción.',
+                'errors' => $e->getMessage(),
+            ], 422);
         }
     }
 

@@ -46,7 +46,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::post('/verification/patient', [PatientProfilesController::class, 'verifyPatientAccount'])->name('patients.verifyAccount');
     Route::post('/verification/professionals', [ProfessionalProfilesController::class, 'verifyProfessionalAccount'])->name('professionals.verifyAccount');
     Route::get('/is-verified', [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
-    Route::get('/subscriptions', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
+    Route::get('/subscriptions/me', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
 
     /* Rutas asociadas al manejo de las clínicas médicas */
     Route::get('/medical-clinics/view', [MedicalClinicController::class, 'index'])->name('medical-clinic.index');

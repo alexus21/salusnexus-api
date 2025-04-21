@@ -238,7 +238,7 @@ class AuthController extends Controller {
         // Guarda el token con la fecha de expiración en la base de datos
         $token->save();
 
-        $user = (new User)->getUserInfoByItsId($user->id);
+        $user = (new User)->getUserProfile($user->id);
 
         // Retorna una respuesta JSON con los datos del usuario y el token generado
         return response()->json([
