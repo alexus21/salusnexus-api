@@ -214,13 +214,13 @@ class UserController extends Controller {
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request) {
-        if (!Auth::check() || !Auth::user()->verified || Auth::user()->id != $request->id || $request->keyword !=  'ELIMINAR') {
+    public function destroy(Request $request, int $id) {
+        if (!Auth::check() || !Auth::user()->verified || Auth::user()->id != $id || $request->keyword !=  'ELIMINAR') {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
 
         try {
-            $user = User::find($request->id);
+            $user = User::find($id);
 
             if (!$user) {
                 return response()->json([

@@ -44,7 +44,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::patch('/update/{id}', [UserController::class, 'update'])->name('users.update');
     Route::put('/update-password/{id}', [UserController::class, 'updatePassword'])->name('users.updatePassword');
-    Route::delete('/delete', [UserController::class, 'destroy'])->name('users.delete');
+    Route::delete('/delete/{id}', [UserController::class, 'destroy'])->name('users.delete');
 
     /* Rutas asociadas a la verificación de los perfiles */
     Route::get('/validate', [AuthController::class, 'validateToken'])->name('auth.validateToken');
