@@ -40,17 +40,23 @@ Route::get('/subscription-plans', [SubscriptionPlanController::class, 'index'])-
 Route::get('/subscription-plan/{type}', [SubscriptionPlanController::class, 'showByTypeParam'])->name('subscription-plan.byTypeParam');
 
 Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function () {
+    /* Rutas asociadas al manejo de los usuarios */
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::patch('/update/{id}', [UserController::class, 'update'])->name('users.update');
+
+    /* Rutas asociadas a la verificación de los perfiles */
     Route::get('/validate', [AuthController::class, 'validateToken'])->name('auth.validateToken');
-    Route::post('/add-payment-method', [SubscriptionsController::class, 'create'])->name('subscriptions.create');
-    Route::get('/userprofile', [AuthController::class, 'profile'])->name('auth.userProfile');
     Route::post('/verification/patient', [PatientProfilesController::class, 'verifyPatientAccount'])->name('patients.verifyAccount');
     Route::post('/verification/professionals', [ProfessionalProfilesController::class, 'verifyProfessionalAccount'])->name('professionals.verifyAccount');
     Route::get('/is-verified', [AuthController::class, 'isUserVerified'])->name('auth.isUserVerified');
-    Route::get('/subscriptions/me', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
 
     /* Rutas asociadas al manejo de los perfiles de los usuarios */
+    Route::get('/userprofile', [AuthController::class, 'profile'])->name('auth.userProfile');
     Route::get('/userprofile/{id}', [UserController::class, 'show'])->name('auth.show');
+
+    /* Rutas asociadas al manejo de las suscripciones y métodos de pago */
+    Route::post('/add-payment-method', [SubscriptionsController::class, 'create'])->name('subscriptions.create');
+    Route::get('/subscriptions/me', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
 
     /* Rutas asociadas al manejo de las clínicas médicas */
     Route::get('/medical-clinics/view', [MedicalClinicController::class, 'index'])->name('medical-clinic.index');
