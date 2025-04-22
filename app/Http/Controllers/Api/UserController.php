@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller {
     /**
@@ -31,8 +30,6 @@ class UserController extends Controller {
      * Display the specified resource.
      */
     public function show(string $id): JsonResponse {
-        log::info($id);
-
         if (!Auth::check()) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -69,8 +66,6 @@ class UserController extends Controller {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
 
-        log::info($request);
-
         try {
             $user = User::find($id);
 
@@ -81,42 +76,41 @@ class UserController extends Controller {
                 ], 404);
             }
 
-            if($request->has('first_name')) {
+            if ($request->has('first_name')) {
                 $user->first_name = $request->first_name;
             }
 
-            if($request->has('last_name')) {
+            if ($request->has('last_name')) {
                 $user->last_name = $request->last_name;
             }
 
-            if($request->has('phone')) {
+            if ($request->has('phone')) {
                 $user->phone = $request->phone;
             }
 
-            if($request->has('dui')) {
+            if ($request->has('dui')) {
                 $user->dui = $request->dui;
             }
 
-            if($request->has('date_of_birth')) {
+            if ($request->has('date_of_birth')) {
                 $user->date_of_birth = $request->date_of_birth;
             }
 
-            if($request->has('home_address')) {
+            if ($request->has('home_address')) {
                 $user->address = $request->home_address;
             }
 
             $user->save();
 
             $patient_id = DB::table('patient_profiles')->where('user_id', $id)->value('id');
-            log::info($patient_id);
 
             $patient = PatientProfiles::find($patient_id);
 
-            if($request->has('emergency_contact_name')) {
+            if ($request->has('emergency_contact_name')) {
                 $patient->emergency_contact_name = $request->emergency_contact_name;
             }
 
-            if($request->has('emergency_contact_phone')) {
+            if ($request->has('emergency_contact_phone')) {
                 $patient->emergency_contact_phone = $request->emergency_contact_phone;
             }
 
