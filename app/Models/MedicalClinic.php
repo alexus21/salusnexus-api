@@ -71,4 +71,42 @@ class MedicalClinic extends Model {
             ->where('medical_clinics.id', $clinicId)
             ->first();
     }
+
+    public static function getMyClinic($patient_id){
+        return DB::table('medical_clinics')
+            ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+            ->join('users', 'professional_profiles.user_id', '=', 'users.id')
+            ->join('cities', 'medical_clinics.city_id', '=', 'cities.id')
+            ->join('departments', 'cities.department_id', '=', 'departments.id')
+            ->join('professional_specialities', 'professional_profiles.id', '=', 'professional_specialities.professional_id')
+            ->join('specialities', 'professional_specialities.speciality_id', '=', 'specialities.id')
+            ->select(
+                'users.first_name',
+                'users.last_name',
+                'users.phone',
+                'users.email',
+                'users.profile_photo_path',
+                'users.verified',
+                'professional_profiles.id as professional_id',
+                'professional_profiles.biography',
+                'professional_profiles.home_visits',
+                'professional_profiles.years_of_experience',
+                'medical_clinics.id as clinic_id',
+                'medical_clinics.clinic_name',
+                'medical_clinics.address',
+                'medical_clinics.clinic_address_reference',
+                'medical_clinics.clinic_latitude',
+                'medical_clinics.clinic_longitude',
+                'medical_clinics.description',
+                'medical_clinics.facade_photo',
+                'medical_clinics.waiting_room_photo',
+                'medical_clinics.office_photo',
+                'cities.id as city_id',
+                'cities.name as city_name',
+                'departments.name as department_name',
+                'specialities.name as speciality'
+            )
+            ->where('professional_profiles.id', $patient_id)
+            ->first();
+    }
 }

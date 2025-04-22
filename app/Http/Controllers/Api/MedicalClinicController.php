@@ -187,6 +187,37 @@ class MedicalClinicController extends Controller {
         ], 200);
     }
 
+    public function showMyClinic(): JsonResponse {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Acceso no autorizado'], 401);
+        }
+
+        $patient_id = DB::table('professional_profiles')
+            ->where('user_id', Auth::id())
+            ->value('id');
+
+        try{
+            $clinic = MedicalClinic::getMyClinic($patient_id);
+
+            if (!$clinic) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron clínicas médicas'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $clinic
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al procesar la petición: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
