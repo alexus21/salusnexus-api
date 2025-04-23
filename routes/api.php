@@ -42,7 +42,8 @@ Route::get('/subscription-plan/{type}', [SubscriptionPlanController::class, 'sho
 Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function () {
     /* Rutas asociadas al manejo de los usuarios */
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
-    Route::patch('/update/{id}', [PatientProfilesController::class, 'update'])->name('users.update');
+    Route::patch('/patients/update/{id}', [PatientProfilesController::class, 'update'])->name('patients.update');
+    Route::patch('/professionals/update/{id}', [ProfessionalProfilesController::class, 'update'])->name('professionals.update');
     Route::put('/update-password/{id}', [UserController::class, 'updatePassword'])->name('users.updatePassword');
     Route::delete('/delete/{id}', [UserController::class, 'destroy'])->name('users.delete');
 

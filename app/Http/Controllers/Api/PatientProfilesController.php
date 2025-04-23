@@ -84,13 +84,13 @@ class PatientProfilesController extends Controller {
                 $user->phone = $request->phone;
             }
 
-            if ($request->has('dui')) {
+            /*if ($request->has('dui')) {
                 $user->dui = $request->dui;
             }
 
             if ($request->has('date_of_birth')) {
                 $user->date_of_birth = $request->date_of_birth;
-            }
+            }*/
 
             if ($request->has('home_address')) {
                 $user->address = $request->home_address;

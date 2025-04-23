@@ -64,8 +64,62 @@ class ProfessionalProfilesController extends Controller {
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProfessionalProfilesRequest $request, ProfessionalProfiles $professionalProfiles) {
-        //
+    public function update(Request $request, int $id): JsonResponse {
+        if (!Auth::check() || !Auth::user()->verified || Auth::user()->id != $id) {
+            return response()->json(['message' => 'Acceso no autorizado'], 401);
+        }
+
+        try {
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 404);
+            }
+
+            if ($request->has('first_name')) {
+                $user->first_name = $request->first_name;
+            }
+
+            if ($request->has('last_name')) {
+                $user->last_name = $request->last_name;
+            }
+
+            if ($request->has('phone')) {
+                $user->phone = $request->phone;
+            }
+
+            /*if ($request->has('dui')) {
+                $user->dui = $request->dui;
+            }
+
+            if ($request->has('date_of_birth')) {
+                $user->date_of_birth = $request->date_of_birth;
+            }*/
+
+            if ($request->has('home_address')) {
+                $user->address = $request->home_address;
+            }
+
+            $user->save();
+
+            $user = (new User())->getUserProfile($id);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Información actualizada correctamente',
+                'data' => $user
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al actualizar el usuario',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
