@@ -49,6 +49,9 @@ class ClinicSchedulesController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request): JsonResponse {
+        log::info("Respuesta: *********************");
+        log::info($request);
+
         if (!Auth::check() && Auth::user()->role !== 'profesional' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -67,66 +70,37 @@ class ClinicSchedulesController extends Controller {
             ], 403);
         }
 
-        $rules = [
-            'clinic_id' => 'required|integer|exists:medical_clinics,id',
-            'day_of_the_week' => 'required|string|max:20',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-        ];
+        try{
+            foreach ($request->days as $day) {
+                if($day['open']){
+                    $existingSchedule = ClinicSchedules::where('clinic_id', $request->clinic_id)
+                        ->where('day_of_the_week', $day['day_of_the_week'])
+                        ->first();
 
-        $messages = [
-            'clinic_id.required' => 'El campo clinic_id es obligatorio.',
-            'clinic_id.integer' => 'El campo clinic_id debe ser un número entero.',
-            'clinic_id.exists' => 'El clinic_id no existe en la base de datos.',
-            'day_of_the_week.required' => 'El campo day_of_the_week es obligatorio.',
-            'day_of_the_week.string' => 'El campo day_of_the_week debe ser una cadena de texto.',
-            'day_of_the_week.max' => 'El campo day_of_the_week no puede tener más de 20 caracteres.',
-            'start_time.required' => 'El campo start_time es obligatorio.',
-            'start_time.date_format' => 'El campo start_time debe tener el formato HH:MM.',
-            'end_time.required' => 'El campo end_time es obligatorio.',
-            'end_time.date_format' => 'El campo end_time debe tener el formato HH:MM.',
-            'end_time.after' => 'El campo end_time debe ser posterior a start_time.',
-        ];
+                    if ($existingSchedule) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Ya has asignado un horario para este día.'
+                        ], 409);
+                    }
 
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Validar si este horario ya existe
-        $existingSchedule = ClinicSchedules::where('clinic_id', $request->clinic_id)
-            ->where('day_of_the_week', $request->day_of_the_week)
-            ->where('start_time', $request->start_time)
-            ->where('end_time', $request->end_time)
-            ->first();
-
-        if ($existingSchedule) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Este horario ya existe para esta clínica.'
-            ], 409);
-        }
-
-        try {
-            $schedule = ClinicSchedules::create([
-                'clinic_id' => $request->clinic_id,
-                'day_of_the_week' => $request->day_of_the_week,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-            ]);
+                    ClinicSchedules::create([
+                        'clinic_id' => $request->clinic_id,
+                        'day_of_the_week' => $day['day_of_the_week'],
+                        'start_time' => $day['start_time'],
+                        'end_time' => $day['end_time'],
+                    ]);
+                }
+            }
 
             return response()->json([
                 'status' => true,
-                'data' => $schedule
+                'message' => 'Horarios creados correctamente'
             ], 201);
-        } catch (Exception $e) {
+        } catch (Exception $ex) {
             return response()->json([
                 'status' => false,
-                'message' => 'Error al crear el horario: ' . $e->getMessage()
+                'message' => 'Error al crear el horario: ' . $ex->getMessage()
             ], 500);
         }
     }
