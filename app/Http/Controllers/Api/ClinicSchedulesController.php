@@ -48,8 +48,6 @@ class ClinicSchedulesController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request): JsonResponse {
-        log::info($request);
-
         if (!Auth::check() && Auth::user()->role !== 'profesional' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
