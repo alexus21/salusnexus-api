@@ -15,6 +15,7 @@ return new class extends Migration {
                 ->constrained('medical_clinics')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
+            $table->boolean('open')->default(true);
             $table->text('day_of_the_week');
             $table->time('start_time');
             $table->time('end_time');

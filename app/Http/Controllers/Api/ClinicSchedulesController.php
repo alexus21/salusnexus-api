@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateClinicSchedulesRequest;
 use App\Models\ClinicSchedules;
 use App\Models\MedicalClinic;
 use Exception;
@@ -49,6 +48,8 @@ class ClinicSchedulesController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(Request $request): JsonResponse {
+        log::info($request);
+
         if (!Auth::check() && Auth::user()->role !== 'profesional' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -67,37 +68,52 @@ class ClinicSchedulesController extends Controller {
             ], 403);
         }
 
-        try{
+        try {
             foreach ($request->days as $day) {
-                if($day['open']){
-                    $existingSchedule = ClinicSchedules::where('clinic_id', $request->clinic_id)
-                        ->where('day_of_the_week', $day['day_of_the_week'])
-                        ->first();
+                $existingSchedule = ClinicSchedules::where('clinic_id', $request->clinic_id)
+                    ->where('day_of_the_week', $day['day_of_the_week'])
+                    ->first();
 
+                if ($day['open']) {
                     if ($existingSchedule) {
-                        return response()->json([
-                            'status' => false,
-                            'message' => 'Ya has asignado un horario para este día.'
-                        ], 409);
-                    }
+                        $updates = [];
+                        if ($existingSchedule->start_time !== $day['start_time']) {
+                            $updates['start_time'] = $day['start_time'];
+                        }
+                        if ($existingSchedule->end_time !== $day['end_time']) {
+                            $updates['end_time'] = $day['end_time'];
+                        }
 
-                    ClinicSchedules::create([
-                        'clinic_id' => $request->clinic_id,
-                        'day_of_the_week' => $day['day_of_the_week'],
-                        'start_time' => $day['start_time'],
-                        'end_time' => $day['end_time'],
-                    ]);
+                        if (empty($updates)) {
+                            continue;
+                        }
+
+                        DB::table('clinic_schedules')
+                            ->where('id', $existingSchedule->id)
+                            ->update($updates);
+                    } else{
+                        ClinicSchedules::create([
+                            'clinic_id' => $request->clinic_id,
+                            'day_of_the_week' => $day['day_of_the_week'],
+                            'start_time' => $day['start_time'],
+                            'end_time' => $day['end_time'],
+                        ]);
+                    }
+                } else {
+                    if ($existingSchedule) {
+                        $existingSchedule->delete();
+                    }
                 }
             }
 
             return response()->json([
                 'status' => true,
-                'message' => 'Horarios creados correctamente'
+                'message' => 'Horarios procesados correctamente'
             ], 201);
         } catch (Exception $ex) {
             return response()->json([
                 'status' => false,
-                'message' => 'Error al crear el horario: ' . $ex->getMessage()
+                'message' => 'Error al procesar los horarios: ' . $ex->getMessage()
             ], 500);
         }
     }
