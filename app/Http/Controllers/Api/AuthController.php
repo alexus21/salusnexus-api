@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactFormMail;
 use App\Models\PatientProfiles;
 use App\Models\ProfessionalProfiles;
 use App\Models\User;
@@ -13,20 +14,10 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller {
-    /**
-     * Registra un nuevo usuario en el sistema.
-     *
-     * Este método valida los datos enviados en la solicitud, formatea el número de teléfono,
-     * verifica si ya existe, crea el usuario con una contraseña encriptada y genera un token
-     * de acceso personal que expira en una semana.
-     *
-     * @param Request $request Objeto con los datos enviados en la solicitud HTTP.
-     * @return JsonResponse Respuesta JSON con el resultado del registro.
-     */
     public function register(Request $request): JsonResponse {
         $rules = [
             'first_name' => 'required|string',
@@ -108,7 +99,6 @@ class AuthController extends Controller {
 
             $user_id = $user->id;
 
-            // Generar token
             $tokenResult = $user->createToken('Personal Access Token');
             $token = $tokenResult->token;
             $token->expires_at = Carbon::now()->addWeeks(1);
@@ -129,6 +119,7 @@ class AuthController extends Controller {
                     'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
                 ];
 
+                $this->sendWelcomeMail($request);
                 return response()->json([
                     'status' => true,
                     'message' => 'Registrado correctamente',
@@ -154,14 +145,13 @@ class AuthController extends Controller {
                     'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
                 ];
 
+                $this->sendWelcomeMail($request);
                 return response()->json([
                     'status' => true,
                     'message' => 'Registrado correctamente',
                     'data' => $data
                 ], 201);
-            }
-
-            else {
+            } else {
                 return response()->json([
                     'status' => false,
                     'message' => 'Rol de usuario no válido',
@@ -178,24 +168,13 @@ class AuthController extends Controller {
         }
     }
 
-    /**
-     * Inicia sesión para un usuario existente en el sistema.
-     *
-     * Este método valida las credenciales (correo y contraseña), intenta autenticar al usuario,
-     * y si es exitoso, genera un token de acceso personal que expira en una semana.
-     *
-     * @param Request $request Objeto con los datos enviados en la solicitud HTTP.
-     * @return JsonResponse Respuesta JSON con el resultado del inicio de sesión.
-     */
     public function login(Request $request): JsonResponse {
-        // Reglas de validación para los campos del formulario
         $rules = [
-            'email' => 'required|email',    // Correo obligatorio y debe ser un email válido
-            'password' => 'required|string', // Contraseña obligatoria y debe ser texto
-            'user_rol' => 'required|in:paciente,profesional', // Rol de usuario obligatorio y debe ser uno de los valores permitidos
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'user_rol' => 'required|in:paciente,profesional',
         ];
 
-        // Mensajes personalizados para errores de validación
         $messages = [
             'email.required' => 'El correo electrónico es requerido',
             'email.email' => 'El correo electrónico debe ser válido',
@@ -204,63 +183,44 @@ class AuthController extends Controller {
             'user_rol.required' => 'El rol de usuario es requerido',
         ];
 
-        // Crea un validador con los datos de la solicitud, las reglas y los mensajes
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        // Si la validación falla, retorna una respuesta JSON con los errores
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Error de validación',
                 'status' => false,
-                'errors' => $validator->errors() // Lista de errores específicos
-            ], 400); // Código HTTP 400: Solicitud incorrecta
+                'errors' => $validator->errors()
+            ], 400);
         }
 
-        // Extrae las credenciales (email y contraseña) de la solicitud
         $credentials = request(['email', 'password', 'user_rol']);
 
-        // Intenta autenticar al usuario con las credenciales proporcionadas
         if (!auth()->attempt($credentials)) {
             return response()->json([
                 'message' => 'No autorizado',
                 'status' => false,
                 'errors' => ['email' => 'Correo electrónico o contraseña incorrectos']
-            ], 401); // Código HTTP 401: No autorizado
+            ], 401);
         }
 
-        // Obtiene el usuario autenticado desde la solicitud
         $user = $request->user();
-        // Genera un token de acceso personal para el usuario
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
-        // Establece la fecha de expiración del token a una semana desde ahora
         $token->expires_at = Carbon::now()->addWeeks(1);
-        // Guarda el token con la fecha de expiración en la base de datos
         $token->save();
 
         $user = (new User)->getUserProfile($user->id);
 
-        // Retorna una respuesta JSON con los datos del usuario y el token generado
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
             'status' => true,
-            'user' => $user, // Información del usuario autenticado
-            'access_token' => $tokenResult->accessToken, // Token de acceso
-            'token_type' => 'Bearer', // Tipo de token
-            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString() // Fecha de expiración
-        ]); // Código HTTP 200 implícito: Éxito
+            'user' => $user,
+            'access_token' => $tokenResult->accessToken,
+            'token_type' => 'Bearer',
+            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString()
+        ]);
     }
 
-    /**
-     * Cierra la sesión del usuario actual revocando su token de acceso.
-     *
-     * Este método revoca el token de acceso del usuario autenticado,
-     * efectivamente terminando su sesión en el sistema. Requiere que
-     * el usuario esté autenticado a través del middleware 'auth:api'.
-     *
-     * @param Request $request Objeto con los datos de la solicitud HTTP
-     * @return JsonResponse Respuesta JSON confirmando el cierre de sesión
-     */
     public function logout(Request $request): JsonResponse {
         $request->user()->token()->revoke();
 
@@ -318,5 +278,18 @@ class AuthController extends Controller {
             'message' => 'No has verificado tu cuenta',
             'status' => false
         ], 401);
+    }
+
+    private function sendWelcomeMail(Request $request): void {
+        $details = [
+            'subject' => 'Bienvenido a SalusNexus, ' . $request->first_name . '.',
+            'name' => 'SalusNexus',
+            'email' => $request->email,
+            'message' => 'Es un gusto tenerte con nosotros.
+            Estamos aquí para ayudarte a cuidar de tu salud y bienestar.
+            Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.',
+        ];
+
+        Mail::to($request->email)->send(new ContactFormMail($details));
     }
 }
