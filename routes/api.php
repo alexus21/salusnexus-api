@@ -15,12 +15,113 @@ use App\Http\Controllers\Api\SubscriptionPlanController;
 use App\Http\Controllers\Api\SubscriptionsController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\NoBrowserCacheMiddleware;
+use App\Mail\ContactFormMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::fallback(function () {
     return response()->json([
         'message' => 'Página no encontrada. Si tienes dudas contacta con el administrador del sitio.',
     ], 404);
+});
+
+Route::get('/test-welcome-email', function () {
+    $testEmail = env('MAIL_TEST_ADDRESS', 'test@example.com');
+
+    $details = [
+        'subject' => 'Bienvenido a SalusNexus, Angel Vasquez.',
+        'name' => 'SalusNexus',
+        'email' => $testEmail,
+        'message' => 'Es un gusto tenerte con nosotros.
+        Estamos aquí para ayudarte a cuidar de tu salud y bienestar.
+        Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.',
+    ];
+
+    Mail::to($testEmail)->send(new ContactFormMail($details));
+
+    return response()->json([
+        'message' => 'Correo de prueba enviado con éxito',
+        'status' => true
+    ]);
+});
+
+Route::get('/test-reset-password', function () {
+    $testEmail = env('MAIL_TEST_ADDRESS', 'test@example.com');
+
+    $details = [
+        'subject' => 'Restablecimiento de Contraseña - SalusNexus',
+        'email' => $testEmail,
+        'reset_link' => 'https://salusnexus.online/reset-password',
+        'message' => 'Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en SalusNexus.
+
+        Haz clic en el botón de abajo para crear una nueva contraseña. Si no has solicitado este cambio, puedes ignorar este correo y tu contraseña seguirá siendo la misma.',
+    ];
+
+    $mailable = new \Illuminate\Mail\Mailable();
+    $mailable->subject($details['subject']);
+    $mailable->view('reset-password', ['details' => $details]);
+    Mail::to($testEmail)->send($mailable);
+
+    return response()->json([
+        'message' => 'Correo de restablecimiento de contraseña enviado con éxito',
+        'status' => true
+    ]);
+});
+
+Route::get('/test-appointment-email', function () {
+    $testEmail = env('MAIL_TEST_ADDRESS', 'test@example.com');
+
+    $details = [
+        'subject' => 'Confirmación de Cita - SalusNexus',
+        'patient_name' => 'Angel Vasquez',
+        'doctor_name' => 'Dr. Carlos Mendoza',
+        'specialty' => 'Medicina General',
+        'appointment_date' => '15 de Julio de 2023',
+        'appointment_time' => '10:30 AM',
+        'clinic_address' => 'Clínica Médica Central, Calle Principal #123, San Salvador',
+        'notes' => 'Por favor traer su carnet de vacunación y llegar 15 minutos antes.',
+        'calendar_link' => 'https://salusnexus.online/calendar/add?id=123456',
+        'reschedule_link' => 'https://salusnexus.online/appointments/reschedule?id=123456',
+        'map_image_url' => 'https://maps.googleapis.com/maps/api/staticmap?center=San+Salvador&zoom=14&size=600x300&markers=color:red|label:A|San+Salvador&key=' . env('GOOGLE_MAPS_API_KEY'),
+        'map_link' => 'https://maps.google.com/?q=San+Salvador+El+Salvador'
+    ];
+
+    $mailable = new \Illuminate\Mail\Mailable();
+    $mailable->subject($details['subject']);
+    $mailable->view('appointment-confirmation', ['details' => $details]);
+    Mail::to($testEmail)->send($mailable);
+
+    return response()->json([
+        'message' => 'Correo de confirmación de cita enviado con éxito',
+        'status' => true
+    ]);
+});
+
+
+Route::get('/test-subscription-email', function () {
+    $testEmail = env('MAIL_TEST_ADDRESS', 'test@example.com');
+
+    $details = [
+        'subject' => 'Suscripción Premium Activada - SalusNexus',
+        'customer_name' => 'Angel Vasquez',
+        'email' => $testEmail,
+        'plan_name' => 'Plan Premium Paciente',
+        'plan_price' => '$4.99/mes (Facturado anualmente a $59.88)',
+        'start_date' => '12 de Julio de 2023',
+        'next_billing_date' => '12 de Julio de 2024',
+        'payment_method' => 'Visa terminada en 4242',
+        'dashboard_link' => 'https://salusnexus.online/dashboard'
+    ];
+
+    $mailable = new \Illuminate\Mail\Mailable();
+    $mailable->subject($details['subject']);
+    $mailable->view('subscription-confirmation', ['details' => $details]);
+    Mail::to($testEmail)->send($mailable);
+
+    return response()->json([
+        'message' => 'Correo de confirmación de suscripción premium enviado con éxito',
+        'status' => true
+    ]);
 });
 
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
