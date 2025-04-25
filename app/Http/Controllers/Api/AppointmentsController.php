@@ -123,7 +123,7 @@ class AppointmentsController extends Controller {
             $appointment = Appointments::create([
                 'appointment_date' => $request->appointment_date,
                 'duration_minutes' => 0, // Default to 30 minutes if not provided
-                'appointment_status' => 'programada', // Default status
+                'appointment_status' => 'pendiente_confirmacion', // Default status
                 'service_type' => $request->service_type,
                 'visit_reason' => $request->visit_reason,
                 'patient_notes' => null,
@@ -153,6 +153,67 @@ class AppointmentsController extends Controller {
 
             return response()->json([
                 'message' => 'Cita creada con éxito',
+                'appointment' => $appointment,
+                'status' => true
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear la cita',
+                'error' => $e->getMessage(),
+                'status' => false
+            ], 500);
+        }
+    }
+
+    public function confirmAppointment(Request $request, $appointment_id): JsonResponse {
+        if (!Auth::check() && Auth::user()->role !== 'paciente' || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        $rules = [
+            'appointment_status' => 'required|in:programada,cancelada_profesional',
+            'service_type' => 'required|string',
+            'appointment_date' => 'required|date',
+        ];
+
+        $messages = [
+            'appointment_status.required' => 'El estado de la cita es obligatorio.',
+            'appointment_status.in' => 'El estado de la cita debe ser uno de los siguientes: programada,cancelada_profesional.',
+            'service_type.required' => 'El tipo de servicio es obligatorio.',
+            'service_type.string' => 'El tipo de servicio debe ser una cadena de texto.',
+            'appointment_date.required' => 'La fecha de la cita es obligatoria.',
+            'appointment_date.date' => 'La fecha de la cita debe ser una fecha válida.',
+        ];
+
+        $validation = Validator::make($request->all(), $rules, $messages);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $validation->errors(),
+                'status' => false
+            ], 422);
+        }
+
+        try {
+            $appointment = DB::table('appointments')
+                ->where('id', $appointment_id)
+                ->update([
+                    'appointment_status' => $request->appointment_status,
+                    'service_type' => $request->service_type,
+                    'appointment_date' => $request->appointment_date,
+                ]);
+
+            if (!$appointment) {
+                return response()->json([
+                    'message' => 'Error al actualizar el estado de la cita',
+                    'status' => false
+                ], 500);
+            }
+
+            return response()->json([
+                'message' => 'Cita cambiada con éxito',
                 'appointment' => $appointment,
                 'status' => true
             ], 201);
