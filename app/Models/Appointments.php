@@ -49,8 +49,8 @@ class Appointments extends Model {
             ->get();
     }
 
-    public static function getAllUserAppointments($patient_id): Collection {
-        return DB::table('appointment_users')
+    public static function getAllUserAppointments($user_rol, $id): Collection {
+        $query = DB::table('appointment_users')
             ->join('appointments', 'appointment_users.appointment_id', '=', 'appointments.id')
             ->join('patient_profiles', 'appointment_users.patient_user_id', '=', 'patient_profiles.id')
             ->join('users', 'patient_profiles.user_id', '=', 'users.id')
@@ -62,10 +62,19 @@ class Appointments extends Model {
                 'users.first_name',
                 'users.last_name',
                 'users.phone',
+                'users.email',
+                'users.date_of_birth',
+                'users.profile_photo_path',
                 'patient_profiles.emergency_contact_name',
                 'patient_profiles.emergency_contact_phone'
-            )
-            ->where('appointment_users.patient_user_id', $patient_id)
-            ->get();
+            );
+
+        if ($user_rol == "paciente") {
+            $query->where('appointment_users.patient_user_id', $id);
+        } else {
+            $query->where('appointment_users.clinic_id', $id);
+        }
+
+        return $query->get();
     }
 }

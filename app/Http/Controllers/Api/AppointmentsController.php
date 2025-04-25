@@ -26,7 +26,14 @@ class AppointmentsController extends Controller {
         }
 
         try {
-            $appointments = Appointments::getAllAppointments();
+            $clinic_id = DB::table('appointment_users')
+                ->join('medical_clinics', 'appointment_users.clinic_id', '=', 'medical_clinics.id')
+                ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+                ->join('users', 'professional_profiles.user_id', '=', 'users.id')
+                ->where('users.id', Auth::user()->id)
+                ->value('clinic_id');
+
+            $appointments = Appointments::getAllUserAppointments(Auth::user()->user_rol, $clinic_id);
 
             if ($appointments->isEmpty()) {
                 return response()->json([
@@ -56,11 +63,11 @@ class AppointmentsController extends Controller {
         }
 
         try {
-            $patient_id = DB::table('patient_profiles')
+            $pivot_id = DB::table('patient_profiles')
                 ->where('user_id', Auth::user()->id)
                 ->value('id');
 
-            $appointments = Appointments::getAllUserAppointments($patient_id);
+            $appointments = Appointments::getAllUserAppointments(Auth::user()->user_rol, $pivot_id);
 
             if ($appointments->isEmpty()) {
                 return response()->json([
