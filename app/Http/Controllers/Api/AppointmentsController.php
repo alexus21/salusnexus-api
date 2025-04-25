@@ -177,6 +177,9 @@ class AppointmentsController extends Controller {
     }
 
     public function confirmOrCancel(Request $request, $appointment_id): JsonResponse {
+        log::info($request);
+        log::info($appointment_id);
+
         if (!Auth::check() || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -216,7 +219,7 @@ class AppointmentsController extends Controller {
         if ($validation->fails()) {
             return response()->json([
                 'message' => 'Error de validación',
-                'errors' => $validation->errors(),
+                'errors' => $validation->errors()->all(),
                 'status' => false
             ], 422);
         }

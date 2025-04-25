@@ -58,6 +58,7 @@ class Appointments extends Model {
                 'appointments.id as appointment_id',
                 'appointments.appointment_date',
                 'appointments.appointment_status',
+                'appointments.service_type',
                 'patient_profiles.id as patient_id',
                 'users.first_name',
                 'users.last_name',
