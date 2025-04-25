@@ -68,7 +68,7 @@ Route::get('/test-reset-password', function () {
     ]);
 });
 
-Route::get('/test-appointment-email', function () {
+/*Route::get('/test-appointment-email', function () {
     $testEmail = env('MAIL_TEST_ADDRESS', 'test@example.com');
 
     $details = [
@@ -95,7 +95,7 @@ Route::get('/test-appointment-email', function () {
         'message' => 'Correo de confirmación de cita enviado con éxito',
         'status' => true
     ]);
-});
+});*/
 
 
 Route::get('/test-subscription-email', function () {
@@ -191,7 +191,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/appointments/get', [AppointmentsController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/me', [AppointmentsController::class, 'myAppointments'])->name('appointments.myAppointments');
     Route::post('/appointments/add', [AppointmentsController::class, 'store'])->name('appointments.store');
-    Route::patch('/appointments/confirm/{id}', [AppointmentsController::class, 'confirmAppointment'])->name('appointments.confirm');
+    Route::patch('/appointments/confirm/{id}', [AppointmentsController::class, 'confirmOrCancel'])->name('appointments.confirm');
 
     /* Rutas asociadas al manejo de los perfiles de los pacientes */
     Route::get('/patients/get/ages', [PatientProfilesController::class, 'getPatientsAge'])->name('patients.getAges');

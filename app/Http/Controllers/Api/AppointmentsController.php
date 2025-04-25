@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateAppointmentsRequest;
+use App\Mail\ConfirmAppointmentMail;
+use App\Mail\ContactFormMail;
 use App\Models\Appointments;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AppointmentsController extends Controller {
@@ -166,15 +169,20 @@ class AppointmentsController extends Controller {
         }
     }
 
-    public function confirmAppointment(Request $request, $appointment_id): JsonResponse {
-        if (!Auth::check() && Auth::user()->role !== 'paciente' || !Auth::user()->verified) {
+    public function confirmOrCancel(Request $request, $appointment_id): JsonResponse {
+        if (!Auth::check() || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
 
         $rules = [
             'appointment_status' => 'required|in:programada,cancelada_profesional',
-            'service_type' => 'required|string',
+            'service_type' => 'required|in:consultorio,domicilio',
             'appointment_date' => 'required|date',
+            'clinic_name' => 'required|string',
+            'patient_name' => 'required|string',
+            'doctor_name' => 'required|string',
+            'clinic_address' => 'required|string',
+            'email' => 'required|email',
         ];
 
         $messages = [
@@ -184,6 +192,16 @@ class AppointmentsController extends Controller {
             'service_type.string' => 'El tipo de servicio debe ser una cadena de texto.',
             'appointment_date.required' => 'La fecha de la cita es obligatoria.',
             'appointment_date.date' => 'La fecha de la cita debe ser una fecha válida.',
+            'clinic_name.required' => 'El nombre de la clínica es obligatorio.',
+            'clinic_name.string' => 'El nombre de la clínica debe ser una cadena de texto.',
+            'patient_name.required' => 'El nombre completo es obligatorio.',
+            'patient_name.string' => 'El nombre completo debe ser una cadena de texto.',
+            'doctor_name.required' => 'El nombre del doctor es obligatorio.',
+            'doctor_name.string' => 'El nombre del doctor debe ser una cadena de texto.',
+            'clinic_address.required' => 'La dirección de la clínica es obligatoria.',
+            'clinic_address.string' => 'La dirección de la clínica debe ser una cadena de texto.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser una dirección de correo electrónico válida.',
         ];
 
         $validation = Validator::make($request->all(), $rules, $messages);
@@ -196,6 +214,33 @@ class AppointmentsController extends Controller {
             ], 422);
         }
 
+        if($request->appointment_status === "programada") {
+            return $this->confirm($request, $appointment_id);
+        } else{
+            return $this->cancel($request, $appointment_id);
+        }
+    }
+
+    private function confirm(Request $request, $appointment_id): JsonResponse {
+        return $this->runTransaction($appointment_id, $request);
+    }
+
+    private function cancel(Request $request, $appointment_id): JsonResponse {
+        if (Auth::user()->role === 'paciente') {
+            $request->appointment_status = 'cancelada_paciente';
+        } else {
+            $request->appointment_status = 'cancelada_profesional';
+        }
+
+        return $this->runTransaction($appointment_id, $request);
+    }
+
+    /**
+     * @param $appointment_id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    private function runTransaction($appointment_id, Request $request): JsonResponse {
         try {
             $appointment = DB::table('appointments')
                 ->where('id', $appointment_id)
@@ -207,10 +252,12 @@ class AppointmentsController extends Controller {
 
             if (!$appointment) {
                 return response()->json([
-                    'message' => 'Error al actualizar el estado de la cita',
+                    'message' => 'Error al actualizar la cita',
                     'status' => false
                 ], 500);
             }
+
+            $this->sendMail($request);
 
             return response()->json([
                 'message' => 'Cita cambiada con éxito',
@@ -220,7 +267,7 @@ class AppointmentsController extends Controller {
 
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Error al crear la cita',
+                'message' => 'Error al editar la cita',
                 'error' => $e->getMessage(),
                 'status' => false
             ], 500);
@@ -253,5 +300,21 @@ class AppointmentsController extends Controller {
      */
     public function destroy(Appointments $appointments) {
         //
+    }
+
+    private function sendMail(Request $request): void {
+        $details = [
+            'subject' => "Confirmación de cita",
+            'patient_name' => $request->patient_name,
+            'doctor_name' => $request->doctor_name,
+            'appointment_date' => $request->appointment_date,
+            'clinic_name' => $request->clinic_name,
+            'clinic_address' => $request->clinic_address,
+            'email' => $request->email,
+            'message' => 'Un placer saludarte. Queremos informarte que tu cita programada para el día ' .
+                $request->appointment_date . " ha sido " . $request->appointment_status . ".",
+        ];
+
+        Mail::to($request->email)->send(new ConfirmAppointmentMail($details));
     }
 }

@@ -42,6 +42,7 @@ class Appointments extends Model {
                 'users.first_name',
                 'users.last_name',
                 'users.phone',
+                'users.email',
                 'patient_profiles.emergency_contact_name',
                 'patient_profiles.emergency_contact_phone'
             )
