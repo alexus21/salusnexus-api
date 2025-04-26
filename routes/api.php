@@ -161,6 +161,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     /* Rutas asociadas al manejo de las suscripciones y métodos de pago */
     Route::post('/add-payment-method', [SubscriptionsController::class, 'create'])->name('subscriptions.create');
     Route::get('/subscriptions/me', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
+    Route::get('/subscriptions', [SubscriptionsController::class, 'subscriptions'])->name('subscriptions.subscriptions');
 
     /* Rutas asociadas al manejo de las clínicas médicas */
     Route::get('/medical-clinics/view', [MedicalClinicController::class, 'index'])->name('medical-clinic.index');

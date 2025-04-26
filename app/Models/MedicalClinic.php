@@ -31,9 +31,6 @@ class MedicalClinic extends Model {
     ];
 
     public function getClinicInfo($clinic_id) {
-//        JOIN professional_specialities ON professional_profiles.id = professional_specialities.professional_id
-//          JOIN specialities ON professional_specialities.speciality_id = specialities.id;
-
         $query = DB::table('medical_clinics')
             ->join('cities', 'medical_clinics.city_id', '=', 'cities.id')
             ->join('departments', 'cities.department_id', '=', 'departments.id')
@@ -41,6 +38,7 @@ class MedicalClinic extends Model {
             ->join('users', 'professional_profiles.user_id', '=', 'users.id')
             ->join('professional_specialities', 'professional_profiles.id', '=', 'professional_specialities.professional_id')
             ->join('specialities', 'professional_specialities.speciality_id', '=', 'specialities.id')
+            ->join('subscriptions', 'users.id', '=', 'subscriptions.user_id')
             ->select(
                 'medical_clinics.*',
                 'cities.name AS city_name',
@@ -59,7 +57,8 @@ class MedicalClinic extends Model {
             )
             ->when($clinic_id, function ($query, $clinic_id) {
                 return $query->where('medical_clinics.id', '=', $clinic_id);
-            });
+            })
+            ->orderBy('subscription_type', 'ASC');
 
         return $clinic_id ? $query->first() : $query->get();
     }

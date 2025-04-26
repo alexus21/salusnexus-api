@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SubscriptionsController extends Controller {
@@ -98,7 +99,7 @@ class SubscriptionsController extends Controller {
             $current_subscription = Subscriptions::where('user_id', $user_id)->first();
 
             if (!$current_subscription) {
-                $subscription = Subscriptions::create([
+                DB::table('subscriptions')->insert([
                     'user_id' => $user_id,
                     'subscription_type' => $subscription_type,
                     'subscription_status' => 'activa',
@@ -125,7 +126,6 @@ class SubscriptionsController extends Controller {
             return response()->json([
                 'status' => true,
                 'message' => 'Te has suscrito exitosamente a SalusNexus.',
-                'subscription' => $subscription,
             ], 201);
 
         } catch (Exception $e) {
@@ -182,7 +182,7 @@ class SubscriptionsController extends Controller {
         //
     }
 
-    public function mySubscription(): JsonResponse {
+    public function subscriptions(): JsonResponse {
         if (!Auth::check()) {
             return response()->json([
                 'message' => 'No autorizado',
@@ -199,6 +199,8 @@ class SubscriptionsController extends Controller {
                 ->where('subscriptions.user_id', Auth::user()->id)
                 ->first();
 
+            log::info('Subscription: ', [$subscription]);
+
             if ($subscription) {
                 return response()->json([
                     'status' => true,
@@ -210,6 +212,43 @@ class SubscriptionsController extends Controller {
                     'status' => false,
                     'message' => 'No se encontró la suscripción.',
                 ], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ocurrió un error al obtener la suscripción.',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function mySubscription(): JsonResponse {
+        if (!Auth::check()) {
+            return response()->json([
+                'message' => 'No autorizado',
+            ], 401);
+        }
+
+        try {
+            $subscription = DB::table('subscriptions')
+                ->join('subscription_plans', 'subscriptions.subscription_type', '=', 'subscription_plans.subscription_type')
+                ->select(
+                    'subscriptions.subscription_type'
+                )
+                ->where('subscriptions.user_id', Auth::user()->id)
+                ->first();
+
+            if ($subscription->subscription_type == 'profesional_avanzado' || $subscription->subscription_type == 'paciente_avanzado') {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Suscripción encontrada.',
+                    'subscription' => $subscription,
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontró la suscripción.',
+                ], 200);
             }
         } catch (Exception $e) {
             return response()->json([
