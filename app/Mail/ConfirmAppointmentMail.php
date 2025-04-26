@@ -23,8 +23,6 @@ class ConfirmAppointmentMail extends Mailable {
      * Build the message.
      */
     public function build(): ConfirmAppointmentMail {
-        Log::info("Email enviado a: " . $this->details['email'] . " con el asunto: " . $this->details['subject']);
-
         return $this->subject($this->details['subject'])
             ->view('appointment-confirmation');
     }
