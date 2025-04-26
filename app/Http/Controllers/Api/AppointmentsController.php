@@ -284,6 +284,67 @@ class AppointmentsController extends Controller {
         }
     }
 
+    public function reschedule(Request $request, $appointment_id): JsonResponse {
+        log::info($request);
+        log::info($appointment_id);
+
+        if (!Auth::check() || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        $rules = [
+            'appointment_date' => 'required|date|after:today',
+            'reschedule_reason' => 'required',
+        ];
+
+        $messages = [
+            'appointment_date.required' => 'La fecha de la cita es obligatoria.',
+            'appointment_date.date' => 'La fecha de la cita debe ser una fecha válida.',
+            'reschedule_reason.required' => 'El motivo de la reprogramación es obligatorio.',
+            'reschedule_reason.string' => 'El motivo de la reprogramación debe ser una cadena de texto.',
+        ];
+
+        $validation = Validator::make($request->all(), $rules, $messages);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $validation->errors(),
+                'status' => false
+            ], 422);
+        }
+
+        try {
+            $appointment = DB::table('appointments')
+                ->where('id', $appointment_id)
+                ->update([
+                    'appointment_date' => $request->appointment_date,
+                    'appointment_status' => 'programada',
+                    'reschedule_reason' => $request->reschedule_reason,
+                ]);
+
+            if (!$appointment) {
+                return response()->json([
+                    'message' => 'Error al actualizar la cita',
+                    'status' => false
+                ], 500);
+            }
+
+            return response()->json([
+                'message' => 'Cita reprogramada con éxito',
+                'appointment' => $appointment,
+                'status' => true
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error al reprogramar la cita',
+                'error' => $e->getMessage(),
+                'status' => false
+            ], 500);
+        }
+    }
+
     /**
      * Display the specified resource.
      */

@@ -27,6 +27,8 @@ return new class extends Migration {
                 ->nullable();
             $table->text('cancellation_reason')
                 ->nullable();
+            $table->text('reschedule_reason')
+                ->nullable();
             $table->boolean('reminder_sent')
                 ->default(false);
             $table->integer('remind_me_at')

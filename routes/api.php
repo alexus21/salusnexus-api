@@ -192,6 +192,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/appointments/me', [AppointmentsController::class, 'myAppointments'])->name('appointments.myAppointments');
     Route::post('/appointments/add', [AppointmentsController::class, 'store'])->name('appointments.store');
     Route::patch('/appointments/confirm/{id}', [AppointmentsController::class, 'confirmOrCancel'])->name('appointments.confirm');
+    Route::patch('/appointments/reschedule/{id}', [AppointmentsController::class, 'reschedule'])->name('appointments.reschedule');
 
     /* Rutas asociadas al manejo de los perfiles de los pacientes */
     Route::get('/patients/get/ages', [PatientProfilesController::class, 'getPatientsAge'])->name('patients.getAges');

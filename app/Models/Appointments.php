@@ -25,6 +25,7 @@ class Appointments extends Model {
         'patient_notes',
         'professional_notes',
         'cancellation_reason',
+        'reschedule_reason',
         'reminder_sent',
         'remind_me_at',
     ];
