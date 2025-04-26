@@ -130,8 +130,6 @@ class ProfessionalProfilesController extends Controller {
     }
 
     public function verifyProfessionalAccount(Request $request): JsonResponse {
-        log::info($request);
-
         $rules = [
             // Datos para la licencia
             'license_number' => 'required|string',

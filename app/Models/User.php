@@ -65,7 +65,6 @@ class User extends Authenticatable {
 
     public function getUserInfoByItsId($id) {
         $user_rol = Auth::user()->user_rol;
-        log::info('user_rol: ' . $user_rol);
 
         if ($user_rol == 'paciente') {
             return DB::table('users')

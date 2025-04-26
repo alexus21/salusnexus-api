@@ -27,8 +27,6 @@ class MedicalClinicController extends Controller {
 
         $clinic = (new MedicalClinic())->getClinicInfo(null);
 
-        log::info($clinic);
-
         if ($clinic->isEmpty()) {
             return response()->json([
                 'status' => false,

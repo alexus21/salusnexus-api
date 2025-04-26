@@ -101,7 +101,7 @@ class AppointmentsController extends Controller {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
+    public function store(Request $request): JsonResponse {
         if (!Auth::check() && Auth::user()->role !== 'paciente' || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -176,10 +176,7 @@ class AppointmentsController extends Controller {
         }
     }
 
-    public function confirmOrCancel(Request $request, $appointment_id): JsonResponse {
-        log::info($request);
-        log::info($appointment_id);
-
+    public function confirm(Request $request, $appointment_id): JsonResponse {
         if (!Auth::check() || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -224,33 +221,6 @@ class AppointmentsController extends Controller {
             ], 422);
         }
 
-        if($request->appointment_status === "programada") {
-            return $this->confirm($request, $appointment_id);
-        } else{
-            return $this->cancel($request, $appointment_id);
-        }
-    }
-
-    private function confirm(Request $request, $appointment_id): JsonResponse {
-        return $this->runTransaction($appointment_id, $request);
-    }
-
-    private function cancel(Request $request, $appointment_id): JsonResponse {
-        if (Auth::user()->role === 'paciente') {
-            $request->appointment_status = 'cancelada_paciente';
-        } else {
-            $request->appointment_status = 'cancelada_profesional';
-        }
-
-        return $this->runTransaction($appointment_id, $request);
-    }
-
-    /**
-     * @param $appointment_id
-     * @param Request $request
-     * @return JsonResponse
-     */
-    private function runTransaction($appointment_id, Request $request): JsonResponse {
         try {
             $appointment = DB::table('appointments')
                 ->where('id', $appointment_id)
@@ -262,16 +232,94 @@ class AppointmentsController extends Controller {
 
             if (!$appointment) {
                 return response()->json([
-                    'message' => 'Error al actualizar la cita',
+                    'message' => 'Error al aprobar la cita',
                     'status' => false
                 ], 500);
             }
 
-            $this->sendMail($request);
+            $this->sendMail($request, "Confirmación de cita");
 
             return response()->json([
-                'message' => 'Cita cambiada con éxito',
-                'appointment' => $appointment,
+                'message' => 'Cita aprobada con éxito',
+                'status' => true
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error al aprobar la cita',
+                'error' => $e->getMessage(),
+                'status' => false
+            ], 500);
+        }
+    }
+
+    public function cancel(Request $request, $appointment_id): JsonResponse {
+        if (!Auth::check() || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        Auth::user()->user_rol == 'paciente' ?
+            $request->appointment_status = 'cancelada_paciente' : $request->appointment_status = 'cancelada_profesional';
+
+        $rules = [
+            'cancellation_reason' => 'required|string',
+            'service_type' => 'required|in:consultorio,domicilio',
+            'appointment_date' => 'required|date',
+            'clinic_name' => 'required|string',
+            'patient_name' => 'required|string',
+            'doctor_name' => 'required|string',
+            'clinic_address' => 'required|string',
+            'email' => 'required|email',
+        ];
+
+        $messages = [
+            'cancellation_reason.required' => 'El motivo de la cancelación es obligatorio.',
+            'cancellation_reason.string' => 'El motivo de la cancelación debe ser una cadena de texto.',
+            'service_type.required' => 'El tipo de servicio es obligatorio.',
+            'service_type.string' => 'El tipo de servicio debe ser una cadena de texto.',
+            'appointment_date.required' => 'La fecha de la cita es obligatoria.',
+            'appointment_date.date' => 'La fecha de la cita debe ser una fecha válida.',
+            'clinic_name.required' => 'El nombre de la clínica es obligatorio.',
+            'clinic_name.string' => 'El nombre de la clínica debe ser una cadena de texto.',
+            'patient_name.required' => 'El nombre completo es obligatorio.',
+            'patient_name.string' => 'El nombre completo debe ser una cadena de texto.',
+            'doctor_name.required' => 'El nombre del doctor es obligatorio.',
+            'doctor_name.string' => 'El nombre del doctor debe ser una cadena de texto.',
+            'clinic_address.required' => 'La dirección de la clínica es obligatoria.',
+            'clinic_address.string' => 'La dirección de la clínica debe ser una cadena de texto.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser una dirección de correo electrónico válida.',
+        ];
+
+        $validation = Validator::make($request->all(), $rules, $messages);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $validation->errors()->all(),
+                'status' => false
+            ], 422);
+        }
+
+        try {
+            $appointment = DB::table('appointments')
+                ->where('id', $appointment_id)
+                ->update([
+                    'appointment_status' => $request->appointment_status,
+                    'cancellation_reason' => $request->cancellation_reason,
+                ]);
+
+            if (!$appointment) {
+                return response()->json([
+                    'message' => 'Error al cancelar la cita',
+                    'status' => false
+                ], 500);
+            }
+
+            $this->sendMail($request, 'Cancelación de cita');
+
+            return response()->json([
+                'message' => 'Cita cancelada con éxito',
                 'status' => true
             ], 201);
 
@@ -285,9 +333,6 @@ class AppointmentsController extends Controller {
     }
 
     public function reschedule(Request $request, $appointment_id): JsonResponse {
-        log::info($request);
-        log::info($appointment_id);
-
         if (!Auth::check() || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
@@ -329,6 +374,8 @@ class AppointmentsController extends Controller {
                     'status' => false
                 ], 500);
             }
+
+            $this->sendMail($request, 'Reprogramación de cita');
 
             return response()->json([
                 'message' => 'Cita reprogramada con éxito',
@@ -373,9 +420,9 @@ class AppointmentsController extends Controller {
         //
     }
 
-    private function sendMail(Request $request): void {
+    private function sendMail(Request $request, string $subject): void {
         $details = [
-            'subject' => "Confirmación de cita",
+            'subject' => $subject,
             'patient_name' => $request->patient_name,
             'doctor_name' => $request->doctor_name,
             'appointment_date' => $request->appointment_date,

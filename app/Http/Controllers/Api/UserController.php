@@ -62,8 +62,6 @@ class UserController extends Controller {
     }
 
     public function updatePassword(Request $request, int $id): JsonResponse {
-        log::info($request);
-
         if (!Auth::check() || !Auth::user()->verified || Auth::user()->id != $id) {
             return response()->json(['message' => 'Acceso no autorizado'], 401);
         }
