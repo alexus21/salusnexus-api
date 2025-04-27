@@ -53,7 +53,8 @@ class MedicalClinic extends Model {
                 'users.longitude',
                 'users.phone',
                 'users.email',
-                'specialities.name AS speciality_name'
+                'specialities.name AS speciality_name',
+                'subscriptions.subscription_type',
             )
             ->when($clinic_id, function ($query, $clinic_id) {
                 return $query->where('medical_clinics.id', '=', $clinic_id);
