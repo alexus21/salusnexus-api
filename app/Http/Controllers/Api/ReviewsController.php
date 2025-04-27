@@ -91,6 +91,15 @@ class ReviewsController extends Controller {
         }
 
         try {
+            // Una review por cita
+            $existingReview = Reviews::where('appointment_id', $request->appointment_id)->first();
+            if ($existingReview) {
+                return response()->json([
+                    'message' => 'Ya has dejado una reseña para esta cita',
+                    'status' => false
+                ], 400);
+            }
+
             $review = Reviews::create([
                 'appointment_id' => $request->appointment_id,
                 'rating' => $request->rating,
