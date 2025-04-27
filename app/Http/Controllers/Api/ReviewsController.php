@@ -44,18 +44,12 @@ class ReviewsController extends Controller {
         ], 200);
     }
 
-    public function getAverage(): JsonResponse {
+    public function getAverage($clinic_id): JsonResponse {
         if (!Auth::check() || !Auth::user()->verified) {
             return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
         }
 
         try{
-            $clinic_id = DB::table('medical_clinics')
-                ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
-                ->join('users', 'professional_profiles.user_id', '=', 'users.id')
-                ->where('users.id', Auth::user()->id)
-                ->value('medical_clinics.id');
-
             $average = round(DB::table('reviews')
                 ->join('appointments', 'reviews.appointment_id', '=', 'appointments.id')
                 ->join('appointment_users', 'appointments.id', '=', 'appointment_users.appointment_id')

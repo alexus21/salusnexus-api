@@ -207,7 +207,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/reviews/get/{id}', [ReviewsController::class, 'show'])->name('reviews.show');
     Route::get('/reviews/get/by-appointment/{id}', [ReviewsController::class, 'showByAppointment'])->name('reviews.byAppointment');
     Route::get('/reviews/get/by-clinic/{id}', [ReviewsController::class, 'showByClinic'])->name('reviews.byClinic');
-    Route::get('/reviews/average', [ReviewsController::class, 'getAverage'])->name('reviews.average');
+    Route::get('/reviews/get/average/{id}', [ReviewsController::class, 'getAverage'])->name('reviews.average');
     Route::post('/reviews/add', [ReviewsController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/reply', [ReviewsController::class, 'addReply'])->name('reviews.reply');
     Route::patch('/reviews/edit/review/{id}', [ReviewsController::class, 'updateReview'])->name('reviews.updateReview');
