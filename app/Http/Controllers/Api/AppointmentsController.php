@@ -91,6 +91,40 @@ class AppointmentsController extends Controller {
         }
     }
 
+    public function getAllPatientAppointments(): JsonResponse {
+        if (!Auth::check() || Auth::user()->user_rol !== 'paciente' || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        $patient_id = DB::table('patient_profiles')
+            ->where('user_id', Auth::user()->id)
+            ->value('id');
+
+        try {
+            $appointments = Appointments::getCompletedAppointments($patient_id);
+
+            if ($appointments->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron citas completadas'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $appointments
+            ], 201);
+
+        } catch (Exception $e) {
+            Log::error('Error al obtener citas: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener citas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */

@@ -30,23 +30,28 @@ class Appointments extends Model {
         'remind_me_at',
     ];
 
-    public static function getAllAppointments(): Collection {
+    public static function getCompletedAppointments($patient_id): Collection {
         return DB::table('appointment_users')
             ->join('appointments', 'appointment_users.appointment_id', '=', 'appointments.id')
-            ->join('patient_profiles', 'appointment_users.patient_user_id', '=', 'patient_profiles.id')
-            ->join('users', 'patient_profiles.user_id', '=', 'users.id')
+            ->join('medical_clinics', 'appointment_users.clinic_id', '=', 'medical_clinics.id')
+            ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+            ->join('users', 'professional_profiles.user_id', '=', 'users.id')
+            ->leftJoin('reviews', 'appointments.id', '=', 'reviews.appointment_id')
             ->select(
+                'medical_clinics.id as clinic_id',
+                'medical_clinics.clinic_name',
+                'users.first_name',
+                'users.last_name',
                 'appointments.id as appointment_id',
                 'appointments.appointment_date',
                 'appointments.appointment_status',
-                'patient_profiles.id as patient_id',
-                'users.first_name',
-                'users.last_name',
-                'users.phone',
-                'users.email',
-                'patient_profiles.emergency_contact_name',
-                'patient_profiles.emergency_contact_phone'
+                'medical_clinics.facade_photo',
+                'medical_clinics.waiting_room_photo',
+                'medical_clinics.office_photo',
+                'reviews.id as review_id',
+                'reviews.rating'
             )
+            ->where('appointment_users.patient_user_id', $patient_id)
             ->get();
     }
 

@@ -191,6 +191,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     /* Rutas asociadas al manejo de las citas */
     Route::get('/appointments/get', [AppointmentsController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/me', [AppointmentsController::class, 'myAppointments'])->name('appointments.myAppointments');
+    Route::get('/appointments/by-patient', [AppointmentsController::class, 'getAllPatientAppointments'])->name('appointments.byPatient');
     Route::post('/appointments/add', [AppointmentsController::class, 'store'])->name('appointments.store');
     Route::patch('/appointments/confirm/{id}', [AppointmentsController::class, 'confirm'])->name('appointments.confirm');
     Route::patch('/appointments/cancel/{id}', [AppointmentsController::class, 'cancel'])->name('appointments.cancel');
