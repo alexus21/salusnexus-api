@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\FavoritesController;
 use App\Http\Controllers\Api\MedicalClinicController;
 use App\Http\Controllers\Api\PatientProfilesController;
 use App\Http\Controllers\Api\ProfessionalProfilesController;
+use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\SpecialitiesController;
 use App\Http\Controllers\Api\SubscriptionPlanController;
 use App\Http\Controllers\Api\SubscriptionsController;
@@ -200,4 +201,13 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     /* Rutas asociadas al manejo de los perfiles de los pacientes */
     Route::get('/patients/get/ages', [PatientProfilesController::class, 'getPatientsAge'])->name('patients.getAges');
     Route::get('/patients/get/closer', [PatientProfilesController::class, 'getPatientsCloseToArea'])->name('patients.closer');
+
+    /* Rutas asociadas al manejo de las reviews */
+    Route::get('/reviews/get', [ReviewsController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/get/{id}', [ReviewsController::class, 'show'])->name('reviews.show');
+    Route::get('/reviews/get/by-appointment/{id}', [ReviewsController::class, 'showByAppointment'])->name('reviews.byAppointment');
+    Route::get('/reviews/get/by-clinic/{id}', [ReviewsController::class, 'showByClinic'])->name('reviews.byClinic');
+    Route::post('/reviews/add', [ReviewsController::class, 'store'])->name('reviews.store');
+//    Route::patch('/reviews/edit/{id}', [ReviewsController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/delete/{id}', [ReviewsController::class, 'destroy'])->name('reviews.delete');
 });

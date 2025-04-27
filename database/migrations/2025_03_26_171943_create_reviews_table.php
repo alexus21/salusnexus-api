@@ -23,8 +23,8 @@ return new class extends Migration {
                 ->default(now());
             $table->boolean('is_published')
                 ->default(true);
-            $table->text('professional_response');
-            $table->timestamp('response_datetime');
+            $table->text('professional_response')->nullable();
+            $table->timestamp('response_datetime')->nullable();
             $table->timestamps();
         });
     }
