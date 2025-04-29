@@ -49,7 +49,8 @@ class Appointments extends Model {
                 'medical_clinics.waiting_room_photo',
                 'medical_clinics.office_photo',
                 'reviews.id as review_id',
-                'reviews.rating'
+                'reviews.rating',
+                'reviews.comment'
             )
             ->where('appointment_users.patient_user_id', $patient_id)
             ->get();
