@@ -111,6 +111,7 @@ class ReviewsController extends Controller {
         if ($validatedData->fails()) {
             return response()->json([
                 'message' => 'Aun no hay reseñas disponibles',
+                'errors' => $validatedData->errors(),
                 'status' => false,
             ], 201);
         }
@@ -136,6 +137,7 @@ class ReviewsController extends Controller {
             ]);
 
             return response()->json([
+                'status' => true,
                 'message' => 'Reseña agregada con éxito',
                 'data' => $review
             ], 201);
