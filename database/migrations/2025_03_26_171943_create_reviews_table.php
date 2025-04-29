@@ -18,7 +18,7 @@ return new class extends Migration {
                 ->onUpdate('cascade');
             $table->smallInteger('rating')
                 ->check('rating >= 1 AND rating <= 5');
-            $table->text('comment');
+            $table->text('comment')->nullable();
             $table->timestamp('review_datetime')
                 ->default(now());
             $table->boolean('is_published')
