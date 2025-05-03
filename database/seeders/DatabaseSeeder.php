@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder {
             SpecialitiesSeeder::class,
             SubscriptionPlansSeeder::class,
             SubscriptionFeaturesSeeder::class,
+            DiseasesSeeder::class,
+            PatientDiseaseSeeder::class,
         ]);
     }
 }

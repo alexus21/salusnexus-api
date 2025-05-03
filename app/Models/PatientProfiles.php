@@ -17,4 +17,17 @@ class PatientProfiles extends Model {
         'emergency_contact_phone',
         'user_id',
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Obtiene las enfermedades asociadas a este perfil de paciente.
+     */
+    public function diseases() {
+        return $this->belongsToMany(Disease::class, 'patient_diseases', 'patient_profile_id', 'disease_id')
+            ->withPivot('reported_at')
+            ->withTimestamps();
+    }
 }

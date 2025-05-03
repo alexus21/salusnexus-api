@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\ClinicSchedulesController;
 use App\Http\Controllers\Api\ClinicViewController;
 use App\Http\Controllers\Api\DepartmentsController;
+use App\Http\Controllers\Api\DiseaseController;
 use App\Http\Controllers\Api\FavoritesController;
 use App\Http\Controllers\Api\MedicalClinicController;
 use App\Http\Controllers\Api\PatientProfilesController;
@@ -161,6 +162,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
 
     /* Rutas asociadas al manejo de las suscripciones y métodos de pago */
     Route::post('/add-payment-method', [SubscriptionsController::class, 'create'])->name('subscriptions.create');
+    Route::post('/change-subscription-plan', [SubscriptionsController::class, 'changePlan'])->name('subscriptions.changePlan');
     Route::get('/subscriptions/me', [SubscriptionsController::class, 'mySubscription'])->name('subscriptions.mySubscription');
     Route::get('/subscriptions', [SubscriptionsController::class, 'subscriptions'])->name('subscriptions.subscriptions');
 
@@ -201,6 +203,13 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     /* Rutas asociadas al manejo de los perfiles de los pacientes */
     Route::get('/patients/get/ages', [PatientProfilesController::class, 'getPatientsAge'])->name('patients.getAges');
     Route::get('/patients/get/closer', [PatientProfilesController::class, 'getPatientsCloseToArea'])->name('patients.closer');
+
+    /* Rutas asociadas al manejo de enfermedades */
+    Route::get('/diseases', [DiseaseController::class, 'index'])->name('diseases.index');
+    Route::get('/diseases/me', [DiseaseController::class, 'getMyDiseases'])->name('diseases.getMyDiseases');
+    Route::post('/diseases/assign', [DiseaseController::class, 'assignDiseases'])->name('diseases.assignDiseases');
+    Route::get('/diseases/patient/{patientId}', [DiseaseController::class, 'getPatientDiseases'])->name('diseases.getPatientDiseases');
+    Route::get('/diseases/{id}', [DiseaseController::class, 'show'])->name('diseases.show');
 
     /* Rutas asociadas al manejo de las reviews */
     Route::get('/reviews/get', [ReviewsController::class, 'index'])->name('reviews.index');

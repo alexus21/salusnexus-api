@@ -274,6 +274,126 @@ class SubscriptionsController extends Controller {
     }
 
     /**
+     * Change the subscription plan for the user
+     */
+    public function changePlan(Request $request): JsonResponse {
+        if (!Auth::check()) {
+            return response()->json([
+                'message' => 'No autorizado',
+            ], 401);
+        }
+
+        $rules = [
+            'subscription_type' => 'required|string|in:paciente_gratis,paciente_avanzado,profesional_gratis,profesional_avanzado',
+            'subscription_period' => 'required|string|in:mensual,anual',
+        ];
+
+        $messages = [
+            'subscription_type.required' => 'El tipo de suscripción es obligatorio.',
+            'subscription_type.in' => 'El tipo de suscripción debe ser uno de los siguientes: paciente_gratis, paciente_avanzado, profesional_gratis, profesional_avanzado.',
+            'subscription_period.required' => 'El período de suscripción es obligatorio.',
+            'subscription_period.in' => 'El período de suscripción debe ser uno de los siguientes: mensual, anual.',
+        ];
+
+        $validation = Validator::make($request->all(), $rules, $messages);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ocurrió un error al validar los datos.',
+                'errors' => $validation->errors(),
+            ], 422);
+        }
+
+        $user = Auth::user();
+        $user_id = $user->id;
+        $user_rol = $user->user_rol;
+
+        // Verificar si el tipo de suscripción coincide con el rol del usuario
+        $subscription_type = $request->subscription_type;
+        if (
+            ($user_rol === 'paciente' && !str_contains($subscription_type, 'paciente')) ||
+            ($user_rol === 'profesional' && !str_contains($subscription_type, 'profesional'))
+        ) {
+            return response()->json([
+                'status' => false,
+                'message' => 'El tipo de suscripción no coincide con tu rol de usuario.',
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $subscription = Subscriptions::where('user_id', $user_id)->first();
+
+            if (!$subscription) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No tienes una suscripción activa.',
+                ], 404);
+            }
+
+            // Si cambia de un plan gratuito a uno avanzado, verificar que tenga un método de pago
+            $isUpgrading = (str_contains($subscription->subscription_type, '_gratis') && str_contains($subscription_type, '_avanzado'));
+            
+            if ($isUpgrading) {
+                $hasPaymentMethod = DB::table('payment_card_users')
+                    ->where('user_id', $user_id)
+                    ->exists();
+
+                if (!$hasPaymentMethod) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Debes agregar un método de pago para cambiar a un plan avanzado.',
+                    ], 422);
+                }
+            }
+
+            // Actualizar la suscripción
+            $subscription->subscription_type = $subscription_type;
+            $subscription->subscription_period = $request->subscription_period;
+            
+            // Si cambia de plan, reiniciar fechas según corresponda
+            if ($subscription->subscription_type !== $subscription_type) {
+                $subscription->start_date = now();
+                
+                // Para planes avanzados, establecer un período de prueba si es un upgrade
+                if (str_contains($subscription_type, '_avanzado') && $isUpgrading) {
+                    $subscription->trial_ends_at = now()->addDays(14);
+                    $subscription->end_date = now()->addDays(14);
+                } else if (str_contains($subscription_type, '_gratis')) {
+                    // Para planes gratuitos, establecer un año
+                    $subscription->end_date = now()->addYear();
+                    $subscription->trial_ends_at = null;
+                } else {
+                    // Para cambios entre planes avanzados, respetar el período
+                    $period = $request->subscription_period === 'mensual' ? 30 : 365;
+                    $subscription->end_date = now()->addDays($period);
+                }
+            }
+
+            $subscription->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Plan de suscripción actualizado exitosamente.',
+                'subscription' => $subscription,
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Ocurrió un error al actualizar la suscripción.',
+                'errors' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Subscriptions $subscriptions) {
