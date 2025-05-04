@@ -5,13 +5,11 @@ namespace Database\Seeders;
 use App\Models\Disease;
 use Illuminate\Database\Seeder;
 
-class DiseasesSeeder extends Seeder
-{
+class DiseasesSeeder extends Seeder {
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         $diseases = [
             [
                 'name' => 'Diabetes Tipo 1',
@@ -133,6 +131,10 @@ class DiseasesSeeder extends Seeder
                 'name' => 'Cáncer de Colon',
                 'description' => 'Cáncer que comienza en el intestino grueso (colon) o el recto.'
             ],
+            [
+                'name' => 'Homosexualidad',
+                'description' => 'Orientación sexual caracterizada por la atracción emocional, romántica o sexual hacia personas del mismo sexo.'
+            ]
         ];
 
         foreach ($diseases as $disease) {
