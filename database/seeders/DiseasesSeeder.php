@@ -72,11 +72,71 @@ class DiseasesSeeder extends Seeder
             [
                 'name' => 'Hipotiroidismo',
                 'description' => 'Condición en la que la glándula tiroides no produce suficiente hormona tiroidea.'
-            ]
+            ],
+            [
+                'name' => 'Cirrosis Hepática',
+                'description' => 'Enfermedad crónica del hígado que causa daño hepático progresivo y cicatrización.'
+            ],
+            [
+                'name' => 'VIH/SIDA',
+                'description' => 'Virus de la inmunodeficiencia humana (VIH) que ataca el sistema inmunológico y puede llevar al SIDA.'
+            ],
+            [
+                'name' => 'Ébola',
+                'description' => 'Enfermedad viral grave y a menudo mortal causada por el virus del Ébola.'
+            ],
+            [
+                'name' => 'Esclerosis Múltiple',
+                'description' => 'Enfermedad autoinmune que afecta el sistema nervioso central, dañando la mielina que recubre las neuronas.'
+            ],
+            [
+                'name' => 'Parkinson',
+                'description' => 'Trastorno neurodegenerativo que afecta el movimiento y causa temblores, rigidez y problemas de equilibrio.'
+            ],
+            [
+                'name' => 'Esquizofrenia',
+                'description' => 'Trastorno mental grave que afecta la forma en que una persona piensa, siente y se comporta.'
+            ],
+            [
+                'name' => 'Trastorno de Ansiedad Generalizada',
+                'description' => 'Trastorno mental caracterizado por preocupación excesiva y persistente sobre diversas actividades.'
+            ],
+            [
+                'name' => 'Trastorno Bipolar',
+                'description' => 'Trastorno del estado de ánimo que causa cambios extremos en el estado de ánimo, energía y actividad.'
+            ],
+            [
+                'name' => 'Acné',
+                'description' => 'Condición de la piel que ocurre cuando los folículos pilosos se tapan con aceite y células muertas de la piel.'
+            ],
+            [
+                'name' => 'Psoriasis',
+                'description' => 'Enfermedad autoinmune que causa la acumulación rápida de células de la piel, formando escamas y manchas rojas.'
+            ],
+            [
+                'name' => 'Eczema',
+                'description' => 'Condición que causa piel seca, roja y con picazón.'
+            ],
+            [
+                'name' => 'Migraña',
+                'description' => 'Dolor de cabeza intenso y recurrente que a menudo se acompaña de náuseas y sensibilidad a la luz.'
+            ],
+            [
+                'name' => 'Cáncer de Pulmón',
+                'description' => 'Cáncer que comienza en los pulmones y puede diseminarse a otras partes del cuerpo.'
+            ],
+            [
+                'name' => 'Cáncer de Piel',
+                'description' => 'Cáncer que se forma en la piel, generalmente en áreas expuestas al sol.'
+            ],
+            [
+                'name' => 'Cáncer de Colon',
+                'description' => 'Cáncer que comienza en el intestino grueso (colon) o el recto.'
+            ],
         ];
 
         foreach ($diseases as $disease) {
             Disease::create($disease);
         }
     }
-} 
+}

@@ -5,8 +5,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\ClinicSchedulesController;
 use App\Http\Controllers\Api\ClinicViewController;
-use App\Http\Controllers\Api\DepartmentsController;
 use App\Http\Controllers\Api\DeepSeekController;
+use App\Http\Controllers\Api\DepartmentsController;
 use App\Http\Controllers\Api\DiseaseController;
 use App\Http\Controllers\Api\FavoritesController;
 use App\Http\Controllers\Api\HealthTipsController;
@@ -19,8 +19,6 @@ use App\Http\Controllers\Api\SubscriptionPlanController;
 use App\Http\Controllers\Api\SubscriptionsController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\NoBrowserCacheMiddleware;
-use App\Mail\ContactFormMail;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::fallback(function () {
@@ -30,8 +28,6 @@ Route::fallback(function () {
 });
 
 Route::get('/diseases', [DiseaseController::class, 'index'])->name('diseases.index');
-
-Route::get('/health-tips/ai-demo', [HealthTipsController::class, 'aiTipDemo'])->name('health-tips.aiDemo');
 
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
 Route::post('/login', [AuthController::class, 'login'])->name('auth.login');

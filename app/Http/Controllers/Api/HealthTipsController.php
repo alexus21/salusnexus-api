@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreHealthTipsRequest;
 use App\Http\Requests\UpdateHealthTipsRequest;
-use App\Models\HealthTips;
 use App\Models\Disease;
-use App\Services\GeminiService;
-use App\Services\GeminiOpenAIService;
+use App\Models\HealthTips;
 use App\Services\DeepSeekService;
+use App\Services\GeminiOpenAIService;
+use App\Services\GeminiService;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class HealthTipsController extends Controller {
     protected $geminiService;
@@ -20,9 +23,9 @@ class HealthTipsController extends Controller {
     protected $deepSeekService;
 
     public function __construct(
-        GeminiService $geminiService, 
+        GeminiService       $geminiService,
         GeminiOpenAIService $geminiOpenAIService,
-        DeepSeekService $deepSeekService
+        DeepSeekService     $deepSeekService
     ) {
         $this->geminiService = $geminiService;
         $this->geminiOpenAIService = $geminiOpenAIService;
@@ -33,10 +36,9 @@ class HealthTipsController extends Controller {
      * Generate a health tip for a patient with specific diseases
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function generateTip(Request $request)
-    {
+    public function generateTip(Request $request): JsonResponse {
         // Validar entrada
         $validator = Validator::make($request->all(), [
             'disease_ids' => 'required|array',
@@ -61,6 +63,8 @@ class HealthTipsController extends Controller {
             ], 404);
         }
 
+        log::info($diseases);
+
         // Crear lista de nombres de enfermedades
         $diseaseNames = $diseases->pluck('name')->implode(', ');
 
@@ -70,31 +74,31 @@ class HealthTipsController extends Controller {
         try {
             // Usar servicio seleccionado (Gemini OpenAI por defecto)
             $service = $request->input('service', 'gemini_openai');
-            
+
             if ($service === 'gemini') {
                 $response = $this->geminiService->generateContent([
                     ['role' => 'user', 'content' => $prompt]
                 ]);
-                
+
                 $jsonContent = $response['completion'];
                 $validatedData = $this->geminiService->validateHealthTipFormat($jsonContent);
             } elseif ($service === 'gemini_openai') {
                 $response = $this->geminiOpenAIService->createChatCompletion([
                     ['role' => 'user', 'content' => $prompt]
                 ]);
-                
+
                 $jsonContent = $response['completion'];
                 $validatedData = $this->geminiOpenAIService->validateHealthTipFormat($jsonContent);
             } else {
                 $response = $this->deepSeekService->createChatCompletion([
                     ['role' => 'user', 'content' => $prompt]
                 ]);
-                
+
                 $jsonContent = $response['completion'];
                 // Limpiar posibles delimitadores markdown en la respuesta
                 $jsonContent = preg_replace('/```json\s*/', '', $jsonContent);
                 $jsonContent = preg_replace('/```\s*/', '', $jsonContent);
-                
+
                 $validatedData = json_decode($jsonContent, true);
             }
 
@@ -113,22 +117,22 @@ class HealthTipsController extends Controller {
                 'health_tip' => $validatedData,
                 'diseases' => $diseases->pluck('name'),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $errorDetails = [
                 'message' => $e->getMessage(),
                 'prompt' => $prompt,
                 'service' => $service,
-                'model' => $service === 'gemini' 
-                    ? config('services.gemini.model') 
-                    : ($service === 'gemini_openai' 
-                        ? config('services.gemini.model') 
+                'model' => $service === 'gemini'
+                    ? config('services.gemini.model')
+                    : ($service === 'gemini_openai'
+                        ? config('services.gemini.model')
                         : config('services.deepseek.model')),
                 'exception_class' => get_class($e)
             ];
-            
+
             // Log error for debugging
             Log::error('Health tip generation error', $errorDetails);
-            
+
             // Check if running in debug mode to return more details
             if (config('app.debug')) {
                 return response()->json([
@@ -137,7 +141,7 @@ class HealthTipsController extends Controller {
                     'debug_info' => $errorDetails
                 ], 500);
             }
-            
+
             return response()->json([
                 'status' => false,
                 'message' => 'Error al generar consejo de salud: ' . $e->getMessage()
@@ -151,9 +155,8 @@ class HealthTipsController extends Controller {
      * @param string $diseaseNames Comma-separated list of disease names
      * @return string The prompt
      */
-    protected function buildHealthTipPrompt($diseaseNames)
-    {
-        return "Genera un consejo de salud para un paciente con las siguientes condiciones médicas: {$diseaseNames}. 
+    protected function buildHealthTipPrompt(string $diseaseNames): string {
+        return "Genera un consejo de salud para un paciente con las siguientes condiciones médicas: {$diseaseNames}.
 El consejo debe seguir EXACTAMENTE este formato JSON:
 {
   \"title\": \"Título breve del consejo\",
@@ -169,10 +172,9 @@ Importante: Mantén este formato exacto sin añadir campos adicionales.";
     /**
      * Demo function to test Gemini integration (accessible via web)
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
-    public function demo()
-    {
+    public function demo(): View {
         return view('health-tips.demo');
     }
 

@@ -5,15 +5,13 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
-class GeminiService
-{
+class GeminiService {
     protected $client;
     protected $apiKey;
     protected $baseUrl;
     protected $model;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->apiKey = config('services.gemini.api_key');
         $this->baseUrl = config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
         $this->model = config('services.gemini.model', 'gemini-2.0-flash');
@@ -31,8 +29,7 @@ class GeminiService
      * @param array $messages Array of messages with role and content
      * @return array Response from the API
      */
-    public function generateContent(array $messages)
-    {
+    public function generateContent(array $messages) {
         try {
             $endpoint = "/models/{$this->model}:generateContent?key={$this->apiKey}";
 
@@ -88,8 +85,7 @@ class GeminiService
      * @param string $content Response content
      * @return string Cleaned JSON
      */
-    protected function cleanJsonResponse($content)
-    {
+    protected function cleanJsonResponse($content) {
         // Remover delimitadores de código markdown
         $content = preg_replace('/```json\s*/', '', $content);
         $content = preg_replace('/```\s*/', '', $content);
@@ -114,8 +110,7 @@ class GeminiService
      * @param string $jsonContent JSON content to validate
      * @return bool|array Return false if invalid, or the decoded JSON if valid
      */
-    public function validateHealthTipFormat($jsonContent)
-    {
+    public function validateHealthTipFormat($jsonContent) {
         try {
             $data = json_decode($jsonContent, true);
 

@@ -5,16 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessDeepSeekRequest;
 use App\Services\DeepSeekService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
-class DeepSeekController extends Controller
-{
+class DeepSeekController extends Controller {
     protected $deepSeekService;
 
-    public function __construct(DeepSeekService $deepSeekService)
-    {
+    public function __construct(DeepSeekService $deepSeekService) {
         $this->deepSeekService = $deepSeekService;
     }
 
@@ -22,13 +21,12 @@ class DeepSeekController extends Controller
      * Send a message to DeepSeek API and get a response
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function chat(Request $request)
-    {
+    public function chat(Request $request): JsonResponse {
         // Aumentar el tiempo límite para esta petición específica
         set_time_limit(120); // 2 minutos
-        
+
         $request->validate([
             'prompt' => 'required|string',
             'system_message' => 'sometimes|string',
@@ -48,10 +46,10 @@ class DeepSeekController extends Controller
         if ($async) {
             // Generar un ID único para esta solicitud
             $requestId = Str::uuid()->toString();
-            
+
             // Encolar el trabajo en segundo plano
             ProcessDeepSeekRequest::dispatch($messages, $requestId);
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'Tu solicitud está siendo procesada.',
@@ -83,10 +81,9 @@ class DeepSeekController extends Controller
      * Check the status of an asynchronous request
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function checkStatus(Request $request)
-    {
+    public function checkStatus(Request $request): JsonResponse {
         $request->validate([
             'request_id' => 'required|string'
         ]);

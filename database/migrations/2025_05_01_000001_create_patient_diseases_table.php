@@ -19,9 +19,11 @@ return new class extends Migration {
                 ->constrained('diseases')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
+            $table->boolean('has_premium_subscription')->default(false);
+            $table->boolean('wants_health_tips')->default(false);
             $table->timestamp('reported_at')->useCurrent();
             $table->timestamps();
-            
+
             // Asegura que un paciente no pueda estar vinculado a la misma enfermedad múltiples veces
             $table->unique(['patient_profile_id', 'disease_id'], 'patient_diseases_unique');
         });
@@ -33,4 +35,4 @@ return new class extends Migration {
     public function down(): void {
         Schema::dropIfExists('patient_diseases');
     }
-}; 
+};
