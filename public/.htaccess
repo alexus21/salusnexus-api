@@ -1,3 +1,15 @@
+# Aumentar tiempo límite para peticiones largas
+<IfModule mod_php.c>
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# Si se usa FastCGI
+<IfModule mod_fcgid.c>
+    FcgidIOTimeout 300
+    FcgidBusyTimeout 300
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\ClinicSchedulesController;
 use App\Http\Controllers\Api\ClinicViewController;
 use App\Http\Controllers\Api\DepartmentsController;
+use App\Http\Controllers\Api\DeepSeekController;
 use App\Http\Controllers\Api\DiseaseController;
 use App\Http\Controllers\Api\FavoritesController;
 use App\Http\Controllers\Api\HealthTipsController;
@@ -127,3 +128,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::patch('/reviews/edit/reply/{id}', [ReviewsController::class, 'updateReply'])->name('reviews.updateReply');
     Route::delete('/reviews/delete/{id}', [ReviewsController::class, 'destroy'])->name('reviews.delete');
 });
+
+// DeepSeek AI API route
+Route::post('/deepseek', [DeepSeekController::class, 'chat'])->name('deepseek.chat');
+Route::post('/deepseek/status', [DeepSeekController::class, 'checkStatus'])->name('deepseek.status');
