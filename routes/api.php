@@ -29,6 +29,8 @@ Route::fallback(function () {
     ], 404);
 });
 
+Route::get('/diseases', [DiseaseController::class, 'index'])->name('diseases.index');
+
 Route::get('/health-tips/ai-demo', [HealthTipsController::class, 'aiTipDemo'])->name('health-tips.aiDemo');
 
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
@@ -110,7 +112,6 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     Route::get('/patients/get/closer', [PatientProfilesController::class, 'getPatientsCloseToArea'])->name('patients.closer');
 
     /* Rutas asociadas al manejo de enfermedades */
-    Route::get('/diseases', [DiseaseController::class, 'index'])->name('diseases.index');
     Route::get('/diseases/me', [DiseaseController::class, 'getMyDiseases'])->name('diseases.getMyDiseases');
     Route::post('/diseases/assign', [DiseaseController::class, 'assignDiseases'])->name('diseases.assignDiseases');
     Route::get('/diseases/patient/{patientId}', [DiseaseController::class, 'getPatientDiseases'])->name('diseases.getPatientDiseases');
@@ -132,3 +133,6 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
 // DeepSeek AI API route
 Route::post('/deepseek', [DeepSeekController::class, 'chat'])->name('deepseek.chat');
 Route::post('/deepseek/status', [DeepSeekController::class, 'checkStatus'])->name('deepseek.status');
+
+// Ruta para generar consejos de salud usando IA
+Route::post('/health-tips/generate', [HealthTipsController::class, 'generateTip'])->name('health-tips.generate');
