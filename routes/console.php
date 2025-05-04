@@ -46,6 +46,6 @@ Schedule::call(function () {
         Log::error('Error in scheduled task: ' . $exception->getMessage());
     }
 })
-    ->weeklyOn(3, '10:00')
+    ->everySecond(3, '10:00')
     ->timezone('America/El_Salvador')
     ->name('weekly_health_tip');

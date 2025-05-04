@@ -13,37 +13,39 @@ class GeminiService {
 
     public function __construct() {
         $this->apiKey = config('services.gemini.api_key');
-        $this->baseUrl = config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
         $this->model = config('services.gemini.model', 'gemini-2.0-flash');
 
         $this->client = new Client([
-            'base_uri' => $this->baseUrl,
             'timeout' => 120,
             'connect_timeout' => 30,
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
         ]);
     }
 
     /**
-     * Create a content generation with Gemini API
+     * Generate content with Gemini API
      *
      * @param array $messages Array of messages with role and content
      * @return array Response from the API
      */
     public function generateContent(array $messages) {
         try {
-            $endpoint = "/models/{$this->model}:generateContent?key={$this->apiKey}";
-
-            // Preparar el mensaje principal que contendrá todo el contenido
-            $mainMessage = "";
+            $url = "{$this->baseUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
+            
+            $text = "";
             foreach ($messages as $message) {
-                $mainMessage .= $message['content'] . "\n\n";
+                $text .= $message['content'] . "\n\n";
             }
-
+            $text = trim($text);
+            
             $payload = [
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => trim($mainMessage)]
+                            ['text' => $text]
                         ]
                     ]
                 ],
@@ -54,27 +56,30 @@ class GeminiService {
                 ]
             ];
 
-            $response = $this->client->post($endpoint, [
+            $response = $this->client->post($url, [
                 'json' => $payload,
                 'timeout' => 120,
             ]);
 
             $responseBody = json_decode($response->getBody()->getContents(), true);
-
-            // Procesar respuesta de Gemini
+            
             $content = $responseBody['candidates'][0]['content']['parts'][0]['text'] ?? null;
-
-            // Limpiar la respuesta JSON si contiene delimitadores markdown
+            
             if ($content) {
                 $content = $this->cleanJsonResponse($content);
             }
-
+            
             return [
                 'completion' => $content,
                 'full_response' => $responseBody,
             ];
         } catch (\Exception $e) {
             Log::error('Gemini API Error: ' . $e->getMessage());
+            Log::error('API URL: ' . $url);
+            Log::error('API Payload: ' . json_encode($payload));
+            if (method_exists($e, 'getResponse') && $e->getResponse()) {
+                Log::error('Response body: ' . $e->getResponse()->getBody());
+            }
             throw $e;
         }
     }
@@ -86,16 +91,13 @@ class GeminiService {
      * @return string Cleaned JSON
      */
     protected function cleanJsonResponse($content) {
-        // Remover delimitadores de código markdown
         $content = preg_replace('/```json\s*/', '', $content);
         $content = preg_replace('/```\s*/', '', $content);
 
-        // Asegurarse de que es un JSON válido
         if (json_decode($content)) {
             return $content;
         }
 
-        // Si no es JSON válido, intentar extraer JSON de la respuesta
         preg_match('/\{.*\}/s', $content, $matches);
         if (!empty($matches[0]) && json_decode($matches[0])) {
             return $matches[0];
