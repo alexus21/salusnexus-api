@@ -19,6 +19,8 @@ return new class extends Migration {
             $table->string('emergency_contact_name', 200);
             $table->string('emergency_contact_phone', 20);
             $table->boolean('wants_health_tips')->default(true);
+            $table->boolean('wants_security_notifications')->default(true);
+            $table->boolean('wants_app_notifications')->default(true);
             $table->timestamps();
         });
     }

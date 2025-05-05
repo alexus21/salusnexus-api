@@ -49,7 +49,7 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     /* Rutas asociadas al manejo de los usuarios */
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::patch('/patients/update/{id}', [PatientProfilesController::class, 'update'])->name('patients.update');
-    Route::patch('/patients/update-health-tips-preference', [PatientProfilesController::class, 'updateHealthTipsPreference'])->name('patients.updateHealthTipsPreference');
+    Route::patch('/patients/update-health-tips-preference', [PatientProfilesController::class, 'updateNotificationsPreferences'])->name('patients.updateHealthTipsPreference');
     Route::get('/patients/health-tips-preference', [PatientProfilesController::class, 'getHealthTipsPreference'])->name('patients.getHealthTipsPreference');
     Route::patch('/professionals/update/{id}', [ProfessionalProfilesController::class, 'update'])->name('professionals.update');
     Route::put('/update-password/{id}', [UserController::class, 'updatePassword'])->name('users.updatePassword');
@@ -108,6 +108,9 @@ Route::middleware(['auth:api', NoBrowserCacheMiddleware::class])->group(function
     /* Rutas asociadas al manejo de los perfiles de los pacientes */
     Route::get('/patients/get/ages', [PatientProfilesController::class, 'getPatientsAge'])->name('patients.getAges');
     Route::get('/patients/get/closer', [PatientProfilesController::class, 'getPatientsCloseToArea'])->name('patients.closer');
+
+    /* Rutas asociadas al manejo de las preferencias de notificaciones */
+    Route::patch('/patients/update-notifications-preferences', [PatientProfilesController::class, 'updateNotificationsPreferences'])->name('patients.updateNotificationsPreference');
 
     /* Rutas asociadas al manejo de enfermedades */
     Route::get('/diseases/me', [DiseaseController::class, 'getMyDiseases'])->name('diseases.getMyDiseases');

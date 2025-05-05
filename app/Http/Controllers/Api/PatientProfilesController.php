@@ -385,24 +385,30 @@ class PatientProfilesController extends Controller {
 
     /**
      * Updates the health tips preference for the authenticated patient.
-     * 
+     *
      * @param Request $request The request containing the wants_health_tips parameter
      * @return JsonResponse The response indicating success or failure
      */
-    public function updateHealthTipsPreference(Request $request): JsonResponse {
+    public function updateNotificationsPreferences(Request $request): JsonResponse {
         if (!Auth::check()) {
             return response()->json(['message' => 'No autorizado'], 401);
         }
 
         $userId = Auth::user()->id;
-        
+
         $rules = [
             'wants_health_tips' => 'required|boolean',
+            'wants_security_notifications' => 'required|boolean',
+            'wants_app_notifications' => 'required|boolean',
         ];
 
         $messages = [
             'wants_health_tips.required' => 'La preferencia de consejos de salud es requerida',
             'wants_health_tips.boolean' => 'La preferencia de consejos de salud debe ser un valor booleano',
+            'wants_security_notifications.required' => 'La preferencia de notificaciones de seguridad es requerida',
+            'wants_security_notifications.boolean' => 'La preferencia de notificaciones de seguridad debe ser un valor booleano',
+            'wants_app_notifications.required' => 'La preferencia de notificaciones de la aplicación es requerida',
+            'wants_app_notifications.boolean' => 'La preferencia de notificaciones de la aplicación debe ser un valor booleano',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -425,14 +431,13 @@ class PatientProfilesController extends Controller {
             }
 
             $patientProfile->wants_health_tips = $request->wants_health_tips;
+            $patientProfile->wants_security_notifications = $request->wants_security_notifications;
+            $patientProfile->wants_app_notifications = $request->wants_app_notifications;
             $patientProfile->save();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Preferencia de consejos de salud actualizada correctamente',
-                'data' => [
-                    'wants_health_tips' => $patientProfile->wants_health_tips
-                ]
             ], 200);
         } catch (Exception $e) {
             return response()->json([
@@ -445,7 +450,7 @@ class PatientProfilesController extends Controller {
 
     /**
      * Gets the health tips preference for the authenticated patient.
-     * 
+     *
      * @return JsonResponse The response containing the current preference
      */
     public function getHealthTipsPreference(): JsonResponse {
