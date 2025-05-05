@@ -69,7 +69,7 @@ Schedule::call(function () {
     }
 })
 //    ->everyMinute()
-//        ->weeklyOn(3, '10:00')
-        ->everyTenSeconds()
+        ->weeklyOn(3, '10:00')
+//        ->everyTenSeconds()
     ->timezone('America/El_Salvador')
     ->name('weekly_health_tip');

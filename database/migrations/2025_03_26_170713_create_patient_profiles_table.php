@@ -18,7 +18,7 @@ return new class extends Migration {
                 ->onUpdate('cascade');
             $table->string('emergency_contact_name', 200);
             $table->string('emergency_contact_phone', 20);
-            $table->boolean('wants_health_tips')->default(false);
+            $table->boolean('wants_health_tips')->default(true);
             $table->timestamps();
         });
     }
