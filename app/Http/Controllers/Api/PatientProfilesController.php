@@ -442,4 +442,41 @@ class PatientProfilesController extends Controller {
             ], 500);
         }
     }
+
+    /**
+     * Gets the health tips preference for the authenticated patient.
+     * 
+     * @return JsonResponse The response containing the current preference
+     */
+    public function getHealthTipsPreference(): JsonResponse {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'No autorizado'], 401);
+        }
+
+        $userId = Auth::user()->id;
+
+        try {
+            $patientProfile = PatientProfiles::where('user_id', $userId)->first();
+
+            if (!$patientProfile) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Perfil de paciente no encontrado'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'wants_health_tips' => $patientProfile->wants_health_tips
+                ]
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener la preferencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
