@@ -38,7 +38,7 @@ Schedule::call(function () {
 
             $response = app(HealthTipsController::class)->generateTip(new Request([
                 'disease_ids' => $disease_ids,
-                'service' => 'gemini_openai',
+                'service' => 'deepseek',
             ]));
 
             if(!$response){
@@ -68,8 +68,10 @@ Schedule::call(function () {
         Log::error('Error en la tarea: ' . $exception->getMessage());
     }
 })
+
 //    ->everyMinute()
-        ->weeklyOn(3, '10:00')
+
 //        ->everyTenSeconds()
+        ->everyMinute()
     ->timezone('America/El_Salvador')
     ->name('weekly_health_tip');
