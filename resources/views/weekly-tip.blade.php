@@ -31,8 +31,8 @@
                         <tr>
                             <td class="mobile-padding" align="center" style="background-color: #2a4785; background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 25px, transparent 25px), radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.15) 35px, transparent 35px), radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.1) 45px, transparent 45px); padding: 60px 40px; position: relative;">
                                 <div style="margin-bottom: 30px; position: relative; z-index: 10;">
-                                    <img src="{{ asset('images/logos/salusnexus-logo-primary.png') }}" alt="SalusNexus" style="width: 220px; height: auto; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));">
-                                    <img src="https://videos.openai.com/vg-assets/assets%2Ftask_01jtfb6npxfspb2n6931pvjg7n%2F1746419312_img_1.webp?st=2025-05-05T03%3A47%3A35Z&se=2025-05-11T04%3A47%3A35Z&sks=b&skt=2025-05-05T03%3A47%3A35Z&ske=2025-05-11T04%3A47%3A35Z&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skoid=8ebb0df1-a278-4e2e-9c20-f2d373479b3a&skv=2019-02-02&sv=2018-11-09&sr=b&sp=r&spr=https%2Chttp&sig=jKpAm3b3%2BB5Eg6YH%2BWg%2Bp3rnnoUkXXg2h4VHWTG9MRA%3D&az=oaivgprodscus" alt="SalusNexus" style="width: 220px; height: auto; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));">
+                                    {{--<img src="{{ asset('images/logos/salusnexus-logo-primary.png') }}" alt="SalusNexus" style="width: 220px; height: auto; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));">--}}
+                                    <img src="https://cdn.jsdelivr.net/gh/alexus21/salusnexus-api@master/public/images/logos/salusnexus-logo-primary.png?raw=true" alt="SalusNexus" style="width: 220px; height: auto; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));">
                                 </div>
                                 <h1 style="color: #ffffff; font-size: 36px; font-weight: 700; margin: 0; line-height: 1.3; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);">Consejos semanales para tu salud</h1>
                             </td>
@@ -50,7 +50,8 @@
                         <tr>
                             <td class="mobile-padding" style="padding: 50px; background-color: #ffffff; position: relative; z-index: 1;">
                                 <div style="margin-bottom: 30px; display: flex; align-items: center;">
-                                    <img src="{{ asset('images/icons/icon-tip.png') }}" width="28" height="28" style="margin-right: 15px;" alt="Ícono consejo">
+                                    <!-- Ícono de bombilla (consejo) desde Flaticon -->
+                                    <img src="https://cdn-icons-png.flaticon.com/128/2088/2088617.png" width="28" height="28" style="margin-right: 15px;" alt="Ícono consejo">
                                     <h3 style="font-size: 24px; font-weight: 600; color: #2a4785; margin: 0;">Consejo de esta semana</h3>
                                 </div>
 
@@ -68,7 +69,8 @@
                         <tr>
                             <td class="mobile-padding" style="background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%); padding: 50px; border-radius: 0 100px 0 0; margin-top: 20px; position: relative; overflow: hidden; z-index: 1;">
                                 <div style="margin-bottom: 30px; display: flex; align-items: center;">
-                                    <img src="{{ asset('images/icons/icon-wellness.png') }}" width="28" height="28" style="margin-right: 15px;" alt="Ícono bienestar">
+                                    <!-- Ícono de corazón/latido (bienestar) desde Flaticon -->
+                                    <img src="https://cdn-icons-png.flaticon.com/128/3004/3004458.png" width="28" height="28" style="margin-right: 15px;" alt="Ícono bienestar">
                                     <h3 style="font-size: 24px; font-weight: 600; color: #2a4785; margin: 0;">Consejos rápidos de bienestar</h3>
                                 </div>
 
