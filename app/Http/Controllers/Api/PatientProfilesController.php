@@ -382,4 +382,64 @@ class PatientProfilesController extends Controller {
 
         return $earthRadius * $c; // Distancia en kilómetros
     }
+
+    /**
+     * Updates the health tips preference for the authenticated patient.
+     * 
+     * @param Request $request The request containing the wants_health_tips parameter
+     * @return JsonResponse The response indicating success or failure
+     */
+    public function updateHealthTipsPreference(Request $request): JsonResponse {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'No autorizado'], 401);
+        }
+
+        $userId = Auth::user()->id;
+        
+        $rules = [
+            'wants_health_tips' => 'required|boolean',
+        ];
+
+        $messages = [
+            'wants_health_tips.required' => 'La preferencia de consejos de salud es requerida',
+            'wants_health_tips.boolean' => 'La preferencia de consejos de salud debe ser un valor booleano',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'error' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $patientProfile = PatientProfiles::where('user_id', $userId)->first();
+
+            if (!$patientProfile) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Perfil de paciente no encontrado'
+                ], 404);
+            }
+
+            $patientProfile->wants_health_tips = $request->wants_health_tips;
+            $patientProfile->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Preferencia de consejos de salud actualizada correctamente',
+                'data' => [
+                    'wants_health_tips' => $patientProfile->wants_health_tips
+                ]
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al actualizar la preferencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

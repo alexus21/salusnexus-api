@@ -15,6 +15,7 @@ class PatientProfiles extends Model {
     protected $fillable = [
         'emergency_contact_name',
         'emergency_contact_phone',
+        'wants_health_tips',
         'user_id',
     ];
 
