@@ -131,10 +131,6 @@ class DiseasesSeeder extends Seeder {
                 'name' => 'Cáncer de Colon',
                 'description' => 'Cáncer que comienza en el intestino grueso (colon) o el recto.'
             ],
-            [
-                'name' => 'Homosexualidad',
-                'description' => 'Orientación sexual caracterizada por la atracción emocional, romántica o sexual hacia personas del mismo sexo.'
-            ]
         ];
 
         foreach ($diseases as $disease) {

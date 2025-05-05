@@ -23,6 +23,6 @@ class WeekleHealthTipMail extends Mailable {
      */
     public function build(): WeekleHealthTipMail {
         return $this->subject($this->details['subject'])
-            ->view('health-tips.demo');
+            ->view('weekly-tip');
     }
 }

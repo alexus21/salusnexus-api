@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\HealthTipsController;
+use App\Mail\WeekleHealthTipMail;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -13,7 +15,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::call(function () {
-    try{
+    try {
         $send_tips_to = DB::table('subscriptions')
             ->join('users', 'subscriptions.user_id', '=', 'users.id')
             ->join('patient_profiles', 'users.id', '=', 'patient_profiles.user_id')
@@ -21,31 +23,52 @@ Schedule::call(function () {
             ->join('diseases', 'patient_diseases.disease_id', '=', 'diseases.id')
             ->where('subscriptions.subscription_type', 'paciente_avanzado')
             ->where('patient_profiles.wants_health_tips', true)
-            ->select('diseases.id', 'users.email')
+            ->select('users.email', DB::raw("STRING_AGG(diseases.id::TEXT, ', ') AS disease_ids"))
+            ->groupBy('users.email')
             ->get();
 
-        $disease_ids = $send_tips_to->pluck('id')->toArray();
+        foreach ($send_tips_to as $patient) {
+            $disease_ids = explode(', ', $patient->disease_ids);
+            $email = $patient->email;
 
-        if (empty($disease_ids)) {
-            Log::info('No patients with health tips subscription found.');
-            return;
-        }
+            if (empty($disease_ids)){
+                Log::info('No diseases found for patient: ' . $email);
+                continue;
+            }
 
-        $response = app(HealthTipsController::class)->generateTip(new Request([
-            'disease_ids' => $disease_ids,
-            'service' => 'gemini_openai',
-        ]));
+            $response = app(HealthTipsController::class)->generateTip(new Request([
+                'disease_ids' => $disease_ids,
+                'service' => 'gemini_openai',
+            ]));
 
-        if ($response->getStatusCode() === 200) {
-            $data = json_decode($response->getContent(), true);
-            Log::info(json_encode($data));
-        } else {
-            Log::error('Error generating health tips: ' . $response->getContent());
+            if(!$response){
+                Log::info('No response from HealthTipsController for patient: ' . $email);
+                continue;
+            }
+
+            if ($response->getStatusCode() === 200) {
+                $data = json_decode($response->getContent(), true);
+
+                $title = $data['health_tip']['title'];
+                $greeting = $data['health_tip']['greeting'];
+                $tip = $data['health_tip']['tip'];
+
+                $details = [
+                    'subject' => $title,
+                    'greeting' => $greeting,
+                    'tip' => $tip,
+                ];
+
+                Mail::to($email)->send(new WeekleHealthTipMail($details));
+            } else {
+                Log::error('Error generando los tips de salud: ' . $response->getContent());
+            }
         }
     } catch (Exception $exception) {
-        Log::error('Error in scheduled task: ' . $exception->getMessage());
+        Log::error('Error en la tarea: ' . $exception->getMessage());
     }
 })
-    ->everySecond(3, '10:00')
+//    ->everyMinute()
+        ->weeklyOn(3, '10:00')
     ->timezone('America/El_Salvador')
     ->name('weekly_health_tip');
