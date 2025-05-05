@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreHealthTipsRequest;
 use App\Http\Requests\UpdateHealthTipsRequest;
-use App\Mail\ContactFormMail;
-use App\Mail\WeekleHealthTipMail;
 use App\Models\Disease;
 use App\Models\HealthTips;
 use App\Services\DeepSeekService;
@@ -16,7 +14,6 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 

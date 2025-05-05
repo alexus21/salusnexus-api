@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateSubscriptionsRequest;
+use App\Mail\SubscriptionMail;
 use App\Models\PaymentCard;
 use App\Models\Subscriptions;
 use Exception;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class SubscriptionsController extends Controller {
@@ -20,6 +22,37 @@ class SubscriptionsController extends Controller {
      */
     public function index() {
         //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(int $id, string $user_rol, $subscription_period): bool {
+        // Check if the user already has a subscription
+        $existingSubscription = Subscriptions::where('user_id', Auth::user()->id)
+            ->where('subscription_status', 'activa')
+            ->first();
+
+        if ($existingSubscription) {
+            return false;
+        }
+
+        $user_rol == 'paciente' ?
+            $subscription_type = 'paciente_gratis' : $subscription_type = 'profesional_gratis';
+
+        $subscription = Subscriptions::create([
+            'user_id' => $id,
+            'subscription_type' => $subscription_type,
+            'subscription_status' => 'activa',
+            'subscription_period' => $subscription_period,
+            'start_date' => now(),
+            'end_date' => now()->addYear(),
+            'trial_ends_at' => now()->addYear(),
+            'auto_renew' => false,
+            'payment_card_id' => null,
+        ]);
+
+        return $subscription == null;
     }
 
     /**
@@ -123,6 +156,35 @@ class SubscriptionsController extends Controller {
 
             DB::commit();
 
+            // Enviar correo de confirmación
+            $plan_price = "";
+            if ($request->subscription_period == "mensual") {
+                if ($subscription_type == "paciente_avanzado") {
+                    $plan_price = 5.99;
+                } else if ($subscription_type == "profesional_avanzado") {
+                    $plan_price = 7.99;
+                }
+            } else {
+                if ($subscription_type == "paciente_avanzado") {
+                    $plan_price = 59.88;
+                } else if ($subscription_type == "profesional_avanzado") {
+                    $plan_price = 76.809;
+                }
+            }
+
+            $details = [
+                'subject' => 'Confirmación de suscripción',
+                'customer_name' => $user->cardholder_name,
+                'plan_name' => $subscription_type,
+                'plan_price' => $plan_price,
+                'start_date' => now()->format('d/m/Y'),
+                'next_billing_date' => now()->addDays(14)->format('d/m/Y'),
+                'payment_method' => $request->payment_provider,
+                'email' => Auth::user()->email,
+            ];
+
+            Mail::to(Auth::user()->email)->send(new SubscriptionMail($details));
+
             return response()->json([
                 'status' => true,
                 'message' => 'Te has suscrito exitosamente a SalusNexus.',
@@ -142,37 +204,6 @@ class SubscriptionsController extends Controller {
                 'errors' => $e->getMessage(),
             ], 422);
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(int $id, string $user_rol, $subscription_period): bool {
-        // Check if the user already has a subscription
-        $existingSubscription = Subscriptions::where('user_id', Auth::user()->id)
-            ->where('subscription_status', 'activa')
-            ->first();
-
-        if ($existingSubscription) {
-            return false;
-        }
-
-        $user_rol == 'paciente' ?
-            $subscription_type = 'paciente_gratis' : $subscription_type = 'profesional_gratis';
-
-        $subscription = Subscriptions::create([
-            'user_id' => $id,
-            'subscription_type' => $subscription_type,
-            'subscription_status' => 'activa',
-            'subscription_period' => $subscription_period,
-            'start_date' => now(),
-            'end_date' => now()->addYear(),
-            'trial_ends_at' => now()->addYear(),
-            'auto_renew' => false,
-            'payment_card_id' => null,
-        ]);
-
-        return $subscription == null;
     }
 
     /**
@@ -335,7 +366,7 @@ class SubscriptionsController extends Controller {
 
             // Si cambia de un plan gratuito a uno avanzado, verificar que tenga un método de pago
             $isUpgrading = (str_contains($subscription->subscription_type, '_gratis') && str_contains($subscription_type, '_avanzado'));
-            
+
             if ($isUpgrading) {
                 $hasPaymentMethod = DB::table('payment_card_users')
                     ->where('user_id', $user_id)
@@ -352,11 +383,11 @@ class SubscriptionsController extends Controller {
             // Actualizar la suscripción
             $subscription->subscription_type = $subscription_type;
             $subscription->subscription_period = $request->subscription_period;
-            
+
             // Si cambia de plan, reiniciar fechas según corresponda
             if ($subscription->subscription_type !== $subscription_type) {
                 $subscription->start_date = now();
-                
+
                 // Para planes avanzados, establecer un período de prueba si es un upgrade
                 if (str_contains($subscription_type, '_avanzado') && $isUpgrading) {
                     $subscription->trial_ends_at = now()->addDays(14);
