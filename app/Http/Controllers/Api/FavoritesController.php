@@ -63,7 +63,9 @@ class FavoritesController extends Controller {
                 ->value('id');
 
             $favorites = Favorites::where('patient_id', $patient_id)
-                ->select('clinic_id')
+                ->join('medical_clinics', 'favorites.clinic_id', '=', 'medical_clinics.id')
+                ->join('cities', 'medical_clinics.city_id', '=', 'cities.id')
+                ->select(['clinic_id', 'clinic_name', 'clinic_address_reference', 'cities.id', 'cities.name', 'facade_photo', 'waiting_room_photo', 'office_photo'])
                 ->get();
 
             if ($favorites->isEmpty()) {
@@ -75,6 +77,7 @@ class FavoritesController extends Controller {
 
             return response()->json([
                 'status' => true,
+                'message' => 'Favoritos obtenidos correctamente',
                 'data' => $favorites
             ], 200);
         } catch (Exception $e) {

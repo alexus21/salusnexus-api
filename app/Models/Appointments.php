@@ -53,6 +53,8 @@ class Appointments extends Model {
                 'reviews.comment'
             )
             ->where('appointment_users.patient_user_id', $patient_id)
+            ->where('appointment_status', '=', 'programada')
+            ->orWhere('appointment_status', '=', 'completada')
             ->get();
     }
 
