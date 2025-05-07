@@ -16,17 +16,17 @@ class SubscriptionFeaturesSeeder extends Seeder
             // Paciente Gratis
             ['feature' => 'Creación de perfil básico', 'subscription_type' => 'paciente_gratis'],
             ['feature' => 'Acceso completo al directorio de profesionales', 'subscription_type' => 'paciente_gratis'],
-            ['feature' => 'Publicar reseñas y calificar establecimientos', 'subscription_type' => 'paciente_gratis'],
             ['feature' => 'Agendar citas', 'subscription_type' => 'paciente_gratis'],
+            ['feature' => 'Historial de clinicas visitadas', 'subscription_type' => 'paciente_gratis'],
             ['feature' => 'Solicitar servicios médicos disponibles', 'subscription_type' => 'paciente_gratis'],
 
             // Paciente Avanzado
             ['feature' => 'Todas las ventajas del plan gratuito', 'subscription_type' => 'paciente_avanzado'],
             ['feature' => 'Acceso a reseñas públicas de otros pacientes', 'subscription_type' => 'paciente_avanzado'],
-            ['feature' => 'Historial de citas', 'subscription_type' => 'paciente_avanzado'],
+            ['feature' => 'Publicar reseñas y calificar establecimientos', 'subscription_type' => 'paciente_avanzado'],
 //            ['feature' => 'Soporte prioritario para la gestión de citas', 'subscription_type' => 'paciente_avanzado'],
             ['feature' => 'Consejos de salud personalizados según perfil', 'subscription_type' => 'paciente_avanzado'],
-            ['feature' => 'Detalles de medicamentos recetados', 'subscription_type' => 'paciente_avanzado'],
+//            ['feature' => 'Detalles de medicamentos recetados', 'subscription_type' => 'paciente_avanzado'],
             ['feature' => 'Notificaciones de citas futuras', 'subscription_type' => 'paciente_avanzado'],
             ['feature' => 'Recordatorios personalizados', 'subscription_type' => 'paciente_avanzado'],
 
