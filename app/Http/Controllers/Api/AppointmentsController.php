@@ -546,4 +546,90 @@ class AppointmentsController extends Controller {
             ], 500);
         }
     }
+
+    public function getPatientClinics(): JsonResponse {
+        if (!Auth::check() || Auth::user()->user_rol !== 'paciente' || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        try {
+            // Get the patient profile ID for the authenticated user
+            $patientId = DB::table('patient_profiles')
+                ->where('user_id', Auth::user()->id)
+                ->value('id');
+                
+            if (!$patientId) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontró el perfil de paciente'
+                ], 404);
+            }
+
+            // Get unique clinics where the patient has had appointments
+            $clinics = DB::table('appointment_users')
+                ->join('medical_clinics', 'appointment_users.clinic_id', '=', 'medical_clinics.id')
+                ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+                ->join('users', 'professional_profiles.user_id', '=', 'users.id')
+                ->select(
+                    'medical_clinics.id as clinic_id',
+                    'medical_clinics.clinic_name',
+                    'medical_clinics.description',
+                    'medical_clinics.address',
+                    'medical_clinics.city_id',
+                    'medical_clinics.clinic_latitude as latitude',
+                    'medical_clinics.clinic_longitude as longitude',
+                    'medical_clinics.facade_photo',
+                    'medical_clinics.waiting_room_photo',
+                    'medical_clinics.office_photo',
+                    'users.id as professional_id',
+                    'users.first_name as professional_first_name',
+                    'users.last_name as professional_last_name',
+                    'users.profile_photo_path as professional_photo',
+                    'users.email as professional_email',
+                    'users.phone as professional_phone',
+                    DB::raw('COUNT(DISTINCT appointment_users.appointment_id) as total_appointments')
+                )
+                ->where('appointment_users.patient_user_id', $patientId)
+                ->groupBy(
+                    'medical_clinics.id',
+                    'medical_clinics.clinic_name',
+                    'medical_clinics.description',
+                    'medical_clinics.address',
+                    'medical_clinics.city_id',
+                    'medical_clinics.clinic_latitude', 
+                    'medical_clinics.clinic_longitude',
+                    'medical_clinics.facade_photo',
+                    'medical_clinics.waiting_room_photo',
+                    'medical_clinics.office_photo',
+                    'users.id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.profile_photo_path',
+                    'users.email',
+                    'users.phone'
+                )
+                ->get();
+
+            if ($clinics->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron clínicas visitadas por este paciente'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'total' => $clinics->count(),
+                'data' => $clinics
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Error al obtener clínicas del paciente: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener clínicas del paciente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
