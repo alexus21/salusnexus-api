@@ -469,4 +469,81 @@ class AppointmentsController extends Controller {
 
         Mail::to($request->email)->send(new ConfirmAppointmentMail($details));
     }
+
+    public function getClinicPatients(): JsonResponse {
+        if (!Auth::check() || Auth::user()->user_rol !== 'profesional' || !Auth::user()->verified) {
+            return response()->json(['message' => 'Acceso no autorizado', 'status' => false], 401);
+        }
+
+        try {
+            // Get the clinic IDs owned by the authenticated professional
+            $clinicIds = DB::table('medical_clinics')
+                ->join('professional_profiles', 'medical_clinics.professional_id', '=', 'professional_profiles.id')
+                ->where('professional_profiles.user_id', Auth::user()->id)
+                ->pluck('medical_clinics.id');
+                
+            if ($clinicIds->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron clínicas asociadas a este profesional'
+                ], 404);
+            }
+
+            // Get unique patients who have appointments at these clinics
+            $patients = DB::table('appointment_users')
+                ->join('appointments', 'appointment_users.appointment_id', '=', 'appointments.id')
+                ->join('patient_profiles', 'appointment_users.patient_user_id', '=', 'patient_profiles.id')
+                ->join('users', 'patient_profiles.user_id', '=', 'users.id')
+                ->select(
+                    'users.id as user_id',
+                    'patient_profiles.id as patient_id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.phone',
+                    'users.profile_photo_path',
+                    'users.date_of_birth',
+                    'users.gender',
+                    'users.address',
+                    'patient_profiles.emergency_contact_name',
+                    'patient_profiles.emergency_contact_phone'
+                )
+                ->whereIn('appointment_users.clinic_id', $clinicIds)
+                ->groupBy(
+                    'users.id',
+                    'patient_profiles.id',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.phone',
+                    'users.profile_photo_path',
+                    'users.date_of_birth',
+                    'users.gender',
+                    'users.address',
+                    'patient_profiles.emergency_contact_name',
+                    'patient_profiles.emergency_contact_phone'
+                )
+                ->get();
+
+            if ($patients->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No se encontraron pacientes con citas en sus clínicas'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $patients
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Error al obtener pacientes de la clínica: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener pacientes de la clínica',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
