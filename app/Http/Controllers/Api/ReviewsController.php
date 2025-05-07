@@ -87,7 +87,7 @@ class ReviewsController extends Controller {
         $rules = [
             'appointment_id' => 'required|integer|exists:appointments,id',
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:255',
+            'comment' => 'string|max:255|nullable',
             'review_datetime' => 'required|date',
         ];
 
@@ -99,7 +99,6 @@ class ReviewsController extends Controller {
             'rating.integer' => 'El campo rating debe ser un número entero.',
             'rating.min' => 'El campo rating debe ser al menos 1.',
             'rating.max' => 'El campo rating no puede ser mayor a 5.',
-            'comment.required' => 'El campo comment es obligatorio.',
             'comment.string' => 'El campo comment debe ser una cadena de texto.',
             'comment.max' => 'El campo comment no puede tener más de 255 caracteres.',
             'review_datetime.required' => 'El campo review_datetime es obligatorio.',
@@ -314,7 +313,7 @@ class ReviewsController extends Controller {
 
         $rules = [
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:255',
+            'comment' => 'string|max:255|nullable',
             'review_datetime' => 'required|date',
         ];
 
@@ -323,7 +322,6 @@ class ReviewsController extends Controller {
             'rating.integer' => 'El campo rating debe ser un número entero.',
             'rating.min' => 'El campo rating debe ser al menos 1.',
             'rating.max' => 'El campo rating no puede ser mayor a 5.',
-            'comment.required' => 'El campo comment es obligatorio.',
             'comment.string' => 'El campo comment debe ser una cadena de texto.',
             'comment.max' => 'El campo comment no puede tener más de 255 caracteres.',
             'review_datetime.required' => 'El campo review_datetime es obligatorio.',
