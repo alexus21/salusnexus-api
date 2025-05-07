@@ -353,6 +353,7 @@ class ReviewsController extends Controller {
 
             return response()->json([
                 'message' => 'Reseña actualizada con éxito',
+                'status' => true,
                 'data' => $review
             ], 200);
         } catch (Exception $e) {
