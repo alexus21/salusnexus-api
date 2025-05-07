@@ -287,12 +287,13 @@ class ReviewsController extends Controller {
             ->join('users', 'patient_profiles.user_id', '=', 'users.id')
             ->where('appointment_users.clinic_id', $clinic_id)
             ->where('reviews.is_published', true)
-            ->select('reviews.*', 'users.first_name as patient_first_name', 'users.last_name  as patient_last_name')
+            ->select('reviews.*', 'users.first_name as patient_first_name', 'users.last_name  as patient_last_name', 'users.profile_photo_path')
             ->get();
 
         return response()->json([
             'message' => 'Reseña obtenida con éxito',
-            'data' => $reviews
+            'data' => $reviews,
+            'count' => count($reviews)
         ], 200);
     }
 
